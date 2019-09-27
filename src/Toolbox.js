@@ -19,7 +19,7 @@ class ToolBox extends React.Component {
     }
 
     listMaps() {
-        Axios.get('http://localhost:8899/bcgis/mapservice/wms/list')
+        Axios.get('http://localhost:8899/bcgis/mapservice/wms/list?workspaceName=D&datastoreName=D')
             .then(function (response) {
                 ReactDOM.render(<MapList response={JSON.stringify(response)}/>, document.getElementById('map'))
                 console.log(response);
