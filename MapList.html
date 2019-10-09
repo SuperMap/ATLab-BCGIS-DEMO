@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>BCGIS</title>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="js.js"></script>
+    <link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <form id="maplist_form">
+        <fieldset>
+            <p>
+                <label for="maplist_workspace_label">工作空间名称：</label>
+                <input type="text" id="maplist_workspace" value="testWS"></input>
+            </p>
+            <p>
+                <label for="maplist_workspace_label">数据存储名称：</label>
+                <input type="text" id="maplist_datastore" value="testDS"></input>
+            </p>
+            <p>
+                <button type="button" id="maplist_btn">查询</button>
+            </p>
+        </fieldset>
+    </form>
+    <div id="maplist">
+        <p id="maps"></p>
+    </div>
+
+</body>
+
+</html>

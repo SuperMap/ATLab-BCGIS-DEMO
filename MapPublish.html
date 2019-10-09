@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>BCGIS</title>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="js.js"></script>
+    <link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <form id="publish_form">
+        <fieldset>
+            <p>
+                <label for="Type_get_label">工作空间名称：</label>
+                <input type="text" id="publish_workspace" value="testWS"></input>
+            </p>
+            <div id="content_get_div">
+                <p>
+                    <label for="ZZBH_op1_get_label">数据存储名称：</label>
+                    <input type="text" id="publish_datastore" value="testDS"></input>
+                </p>
+                <p>
+                    <label for="CZZT_op1_get_label">图层名称：</label>
+                    <input type="text" id="publish_layer" value="testFT"></input>
+                </p>
+            </div>
+            <p>
+                <button type="button" id="publish_btn">发布</button>
+            </p>
+        </fieldset>
+    </form>
+</body>
+
+</html>

@@ -1,35 +1,36 @@
 {
-  "name": "bcgis-app",
-  "version": "0.1.0",
+  "name": "ol-workshop",
+  "description": "OpenLayers workshop",
+  "version": "0.0.0",
   "private": true,
+  "main": "index.js",
   "dependencies": {
-    "axios": "^0.19.0",
+    "colormap": "2.3.1",
+    "jquery": "^3.4.1",
     "ol": "^5.3.3",
-    "prop-types": "^15.7.2",
-    "react": "^16.9.0",
-    "react-axios": "^2.0.3",
-    "react-dom": "^16.9.0",
-    "react-scripts": "3.1.2"
+    "ol-hashed": "^2.0.0",
+    "ol-mapbox-style": "4.3.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "copy-webpack-plugin": "5.0.2",
+    "css-loader": "2.1.1",
+    "eslint": "5.16.0",
+    "eslint-config-openlayers": "11.0.0",
+    "extract-text-webpack-plugin": "3.0.2",
+    "html-webpack-plugin": "3.2.0",
+    "kompas": "0.0.1",
+    "style-loader": "0.23.1",
+    "webpack": "4.29.6",
+    "webpack-cli": "3.3.0",
+    "webpack-dev-server": "3.2.1"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "openlayers"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run lint",
+    "start": "webpack-dev-server --mode=development",
+    "build": "webpack --mode=production"
   }
 }
