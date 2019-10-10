@@ -5,22 +5,48 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import { Fill, Stroke, Style, Text } from 'ol/style';
-import {fromLonLat} from 'ol/proj';
 
-// http://127.0.0.1:8070/geoserver/D/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=D%3AD&maxFeatures=50&outputFormat=application%2Fjson
+// http://127.0.0.1:8070/geoserver/D/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=D%3AtempfeaturesType&maxFeatures=50&outputFormat=text%2Fjavascript
+
+//参数字段  
+var wfsParams = {
+    service: "WFS",
+    version: "1.0.0",
+    request: "GetFeature",
+    typeName: "cite:tempfeaturesType",  //图层名称     
+    outputFormat: "text/javascript",  //重点，不要改变  
+    format_options: "callback:loadFeatures"  //回调函数声明  
+};
 
 const map = new Map({
     target: 'map-container',
     view: new View({
-        center: fromLonLat([116.5, 40.18]),
-        zoom: 9
+        center: [116.5, 39.5], // [116.5, 40.18]
+        zoom: 25
     })
 });
 
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
-    url: './data/features.json',
+    // url: "./data/countries copy.json",
+    loader: function (extent, resolution, projection) {  //加载函数  
+        var url = "http://localhost:8070/geoserver/wfs";
+        $.ajax({
+            url: url,
+            data: $.param(wfsParams),   //传参  
+            type: "GET",
+            dataType: "jsonp",   //解决跨域的关键  
+            jsonpCallback: "loadFeatures"  //回调  
+
+        });
+    },
+    projection: "EPSG:4326"
 });
+
+//回调函数使用
+window.loadFeatures = function (response) {
+    vectorSource.addFeatures((new GeoJSON()).readFeatures(response));  //载入要素
+};
 
 var vectorLayer = new VectorLayer({
     source: vectorSource
@@ -90,14 +116,15 @@ map.on('pointermove', function (evt) {
 });
 
 
-var sendFeatureInfo = function (pixel) {
-    var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+var sendFeatureInfo = function (evt) {
+    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
         return feature;
     });
+    console.log(feature.getId());
 
     if (feature) {
         var params = {
-            "bufferRadius":2,
+            "bufferRadius": 0.02,
             "fid":[feature.getId()]
         };
         $.ajax({
@@ -106,16 +133,11 @@ var sendFeatureInfo = function (pixel) {
             url: 'http://localhost:8899/bcgis/mapservice/buffer/bufferAnalysis',
             data: JSON.stringify(params),
             success: function (data) {
-                // var vectorSource = new VectorSource({
-                //     format: new GeoJSON(),
-                //     url: './data/features.json',
-                //     projection: 'EPSG:4326'
-                // });
-                // var vectorLayer = new VectorLayer({
-                //     source: vectorSource
-                // });
-                // map.addLayer(vectorLayer);
-                console.log('data: ' + JSON.stringify(data));
+                vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+                var vectorLayer2 = new VectorLayer({
+                    source: vectorSource
+                });
+                map.addLayer(vectorLayer2);
             },
             error: function (err) {
                 console.log('err: ');
@@ -136,5 +158,5 @@ var sendFeatureInfo = function (pixel) {
 };
 
 map.on('click', function (evt) {
-    sendFeatureInfo(evt.pixel);
+    sendFeatureInfo(evt);
 });
