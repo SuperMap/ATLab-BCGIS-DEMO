@@ -14,7 +14,7 @@ $(document).ready(function () {
         var params = {
             "workspaceName": document.getElementById("publish_workspace").value,
             "datastoreName": document.getElementById("publish_datastore").value,
-            "featuretypeName": document.getElementById("publish_layer").value  
+            "featuretypeName": document.getElementById("publish_layer").value
         };
         $.ajax({
             type: 'post',
@@ -50,5 +50,19 @@ $(document).ready(function () {
                 console.log(err);
             }
         });
+    });
+
+    $("#analysis_type_select").click(function () {
+        switch ($("#analysis_type_select").val()) {
+            case "union":
+                $("#params").hide();
+                $("#analysis_btn").show();
+                break;
+            case "buffer":
+                $("#params").show();
+                $("#analysis_btn").hide();
+                break;
+
+        }
     });
 });

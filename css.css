@@ -129,13 +129,6 @@ button {
     margin: 0;
 }
 
-#map {
-    background-color: rgb(187, 247, 255);
-    /* width: 100vw; */
-    /* height: 90vh; */
-    margin: 0;
-}
-
 #publish_form {
     margin: 0 auto;
     width: 30%;
@@ -146,9 +139,3 @@ button {
     margin: 0 auto;
     background-color: aliceblue;
 }
-
-
-
-
-
-

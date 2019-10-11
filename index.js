@@ -120,12 +120,13 @@ var sendFeatureInfo = function (evt) {
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
         return feature;
     });
-    console.log(feature.getId());
 
     if (feature) {
+        let bufferRadius = $("#analysis_input").val();
+        console.log(bufferRadius);
         var params = {
-            "bufferRadius": 0.02,
-            "fid":[feature.getId()]
+            "bufferRadius": bufferRadius,
+            "fid": [feature.getId()]
         };
         $.ajax({
             type: 'post',
@@ -157,6 +158,79 @@ var sendFeatureInfo = function (evt) {
     }
 };
 
+
+
+var sendSelectedFeatureInfo = function (evt) {
+    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+        return feature;
+    });
+
+    if (feature) {
+        selectedList[selectedList.length] = feature.getId();
+
+        console.log(selectedList);
+        // $.ajax({
+        //     type: 'post',
+        //     contentType: "application/json",
+        //     url: 'http://localhost:8899/bcgis/mapservice/buffer/bufferAnalysis',
+        //     data: JSON.stringify(params),
+        //     success: function (data) {
+        //         vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+        //         var vectorLayer2 = new VectorLayer({
+        //             source: vectorSource
+        //         });
+        //         map.addLayer(vectorLayer2);
+        //     },
+        //     error: function (err) {
+        //         console.log('err: ');
+        //         console.log(JSON.stringify(err));
+        //     }
+        // });
+    }
+
+    if (feature !== highlight) {
+        if (feature) {
+            featureOverlay.getSource().addFeature(feature);
+        }
+        highlight = feature;
+    }
+};
+
+$("#analysis_btn").click(function () {
+    var params = {
+        "fid": selectedList
+    };
+    selectedList = [];
+
+    $.ajax({
+        type: 'post',
+        contentType: "application/json",
+        url: 'http://localhost:8899/bcgis/mapservice/buffer/unionAnalysis',
+        data: JSON.stringify(params),
+        success: function (data) {
+            vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+            var vectorLayer2 = new VectorLayer({
+                source: vectorSource
+            });
+            map.addLayer(vectorLayer2);
+        },
+        error: function (err) {
+            console.log('err: ');
+            console.log(JSON.stringify(err));
+        }
+    });
+});
+
+var selectedList = [];
 map.on('click', function (evt) {
-    sendFeatureInfo(evt);
+    switch ($("#analysis_type_select").val()) {
+        case "buffer":
+            sendFeatureInfo(evt);
+            break;
+        case "union":
+            sendSelectedFeatureInfo(evt);
+            break;
+        default:
+            break;
+    }
 });
