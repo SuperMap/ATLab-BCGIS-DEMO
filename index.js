@@ -167,25 +167,6 @@ var sendSelectedFeatureInfo = function (evt) {
 
     if (feature) {
         selectedList[selectedList.length] = feature.getId();
-
-        console.log(selectedList);
-        // $.ajax({
-        //     type: 'post',
-        //     contentType: "application/json",
-        //     url: 'http://localhost:8899/bcgis/mapservice/buffer/bufferAnalysis',
-        //     data: JSON.stringify(params),
-        //     success: function (data) {
-        //         vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
-        //         var vectorLayer2 = new VectorLayer({
-        //             source: vectorSource
-        //         });
-        //         map.addLayer(vectorLayer2);
-        //     },
-        //     error: function (err) {
-        //         console.log('err: ');
-        //         console.log(JSON.stringify(err));
-        //     }
-        // });
     }
 
     if (feature !== highlight) {
