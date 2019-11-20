@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>模型展示</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/tooltip.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+</head>
+
+<body>
+    <div id="cesiumContainer"></div>
+    <div id='loadingbar' class="spinner">
+        <div class="spinner-container container1">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+        <div class="spinner-container container2">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+        <div class="spinner-container container3">
+            <div class="circle1"></div>
+            <div class="circle2"></div>
+            <div class="circle3"></div>
+            <div class="circle4"></div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function onload(Cesium) {
+            //初始化viewer部件
+            var viewer = new Cesium.Viewer('cesiumContainer');
+            viewer.imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+                url: 'https://dev.virtualearth.net',
+                mapStyle: Cesium.BingMapsStyle.AERIAL,
+                key: URL_CONFIG.BING_MAP_KEY
+            }));
+            var scene = viewer.scene;
+            var widget = viewer.cesiumWidget;
+            $('#loadingbar').remove();
+            try {
+                //打开所发布三维服务下的所有图层
+                var promise = scene.open(URL_CONFIG.SCENE_OLYMPIC_GREEN);
+                Cesium.when(promise, function (layers) {
+                    scene.camera.setView({
+                        destination: new Cesium.Cartesian3(-2172108.996759282, 4375350.277824589, 4101673.0066891187),
+                        orientation: {
+                            heading: 4.354565476048545,
+                            pitch: -0.35245897259115955,
+                            roll: 9.353513519272383e-10
+                        }
+                    });
+                    // var fanUrl = './SampleData/models/lou1.s3m';
+                    // var pillarUrl = './SampleData/models/lou1.s3m';
+                    // var fanUrl = './data/Fan.s3m';
+                    var pillarUrl = './SampleData/models/lou1.s3m';
+                    var keymap = {};
+                    keymap[pillarUrl] = [];
+                    var layer = new Cesium.DynamicLayer3D(scene._context, [pillarUrl]);
+                    layer.updateInterval = 500;//动态图层更新时间
+                    layer.enableLocalOffset = false;//禁止模型局部偏移
+                    scene.primitives.add(layer);
+                    var points = [
+                        // [116.395185699596, 40.0161837261362, 21.7385280681774],
+                        [116.395074412521, 40.0167102653286, 39.4119813283905]
+                    ];
+                    for (var i = 0; i < points.length; i++) {
+                        var point = points[i];
+                        var pillarState = new Cesium.DynamicObjectState({
+                            id: i,
+                            longitude: point[0],
+                            latitude: point[1],
+                            altitude: point[2],
+                            scale: new Cesium.Cartesian3(1, 1, 1)
+                        });
+                        keymap[pillarUrl].push(pillarState);
+                        for (var key in keymap) {
+                            layer.updateObjectWithModel(key, keymap[key]);
+                        };
+                    }
+                }, function () {
+                    var title = '加载SCP失败，请检查网络连接状态或者url地址是否正确？';
+                    widget.showErrorPanel(title, undefined, e);
+                });
+            } catch (e) {
+                if (widget._showRenderLoopErrors) {
+                    var title = '渲染时发生错误，已停止渲染。';
+                    widget.showErrorPanel(title, undefined, e);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
