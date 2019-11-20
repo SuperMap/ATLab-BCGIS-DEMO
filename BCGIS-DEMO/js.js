@@ -1,3 +1,8 @@
+
+/**
+ *  展示系统的界面设置   
+ */
+
 $(document).ready(function () {
 
     // 导航栏
@@ -9,7 +14,7 @@ $(document).ready(function () {
         <li><a href=\"#\" id=\"info\"></a></li> \
         </ul>");
 
-    // 发布地图
+    // 发布地图（时间为点击）
     $("#publish_btn").click(function () {
         var params = {
             "workspaceName": document.getElementById("publish_workspace").value,
@@ -31,7 +36,6 @@ $(document).ready(function () {
         });
     });
 
-    // 查询已发布的地图
     $("#maplist_btn").click(function () {
         $.ajax({
             type: 'get',
@@ -52,17 +56,53 @@ $(document).ready(function () {
         });
     });
 
+    // 分析的选择，当选择不同按钮时出现不同的显示效果
     $("#analysis_type_select").click(function () {
         switch ($("#analysis_type_select").val()) {
+
             case "union":
+                $("#analysis_btn_union").show();
+                
                 $("#params").hide();
-                $("#analysis_btn").show();
-                break;
-            case "buffer":
-                $("#params").show();
-                $("#analysis_btn").hide();
+                $("#attributesParams").hide();
+                $("#analysis_btn_intersect").hide();
                 break;
 
+            case "intersection":
+                $("#analysis_btn_intersect").show();
+
+                $("#params").hide();
+                $("#attributesParams").hide();
+                $("#analysis_btn_union").hide();
+                break;
+
+            case "buffer":
+                $("#params").show();
+
+                $("#attributesParams").hide();
+                $("#analysis_btn_union").hide();
+                $("#analysis_btn_intersect").hide();
+                break;
+
+            case "attributes":
+                $("#attributesParams").show();
+                $("#attributes_analysis_input").show();
+
+                $("#params").hide();
+                $("#analysis_btn_union").hide();
+                $("#analysis_btn_intersect").hide();
+                break;
+
+            case "spatial":
+                $("#spatialParams").show();
+                $("#attributes_type_label").show();
+                
+                $("#attributesParams").hide();
+                $("#attributes_analysis_input").hide();
+                $("#params").hide();
+                $("#analysis_btn_union").hide();
+                $("#analysis_btn_intersect").hide();
+                break;
         }
     });
 });

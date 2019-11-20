@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="css.css">
 </head>
 
+<!--  -->
+<!-- 具体表现为界面显示地图这一界面 -->
+<!--  -->
+
 <body>
     <div id="header"></div>
     <div id="option">
@@ -19,7 +23,9 @@
                     <select name="analysis_type" id="analysis_type_select">
                         <option value="buffer" selected>缓冲区分析</option>
                         <option value="union">联合分析</option>
-                        <!-- <option value="intersection">叠加分析</option> -->
+                        <option value="intersection">叠加分析</option>
+                        <option value="attributes">属性查询</option>
+                        <option value="spatial">空间查询</option>
                     </select>
                 </p>
                 <p id="params">
@@ -27,7 +33,24 @@
                     <input type="select" id="analysis_input" value="0.01"></input>
                 </p>
                 <p>
-                    <button type="button" id="analysis_btn" hidden="hidden">开始分析</button>
+                    <button type="button" id="analysis_btn_union" hidden="hidden">联合分析</button>
+                </p>
+                <p>
+                    <button type="button" id="analysis_btn_intersect" hidden="hidden">叠加分析</button>
+                </p>
+                <p id="attributesParams" hidden="hidden">
+                    <label for="attributes_type_label">输入属性: </label>
+                    <input type="select" id="attributes_analysis_input" value="shuangliuqu" ></input>
+                    <button type="button" id="analysis_btn_attributes">查询</button>
+                </p>
+                <p id="spatialParams" hidden="hidden">
+                    <label for="attributes_type_label">输入范围: </label>
+                    <!-- 是依次输入然后查询比较好一点，后面再美化 -->
+                    <input type="select" id="spatial_analysis_minX" value="116" ></input>
+                    <input type="select" id="spatial_analysis_minY" value="40" ></input>
+                    <input type="select" id="spatial_analysis_maxX" value="116.2" ></input>
+                    <input type="select" id="spatial_analysis_maxY" value="40.5" ></input>
+                    <button type="button" id="analysis_btn_spatial">查询</button>
                 </p>
             </fieldset>
         </form>
