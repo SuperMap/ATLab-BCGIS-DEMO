@@ -60,12 +60,24 @@ $(document).ready(function () {
     $("#analysis_type_select").click(function () {
         switch ($("#analysis_type_select").val()) {
 
+            case "buffer":
+                $("#params").show();
+
+                $("#attributesParams").hide();
+                $("#analysis_btn_union").hide();
+                $("#analysis_btn_intersect").hide();
+                $("#spatialParams").hide();
+                $("#attributes_type_label").hide();
+                break;
+
             case "union":
                 $("#analysis_btn_union").show();
-                
+
                 $("#params").hide();
                 $("#attributesParams").hide();
                 $("#analysis_btn_intersect").hide();
+                $("#spatialParams").hide();
+                $("#attributes_type_label").hide();
                 break;
 
             case "intersection":
@@ -74,14 +86,8 @@ $(document).ready(function () {
                 $("#params").hide();
                 $("#attributesParams").hide();
                 $("#analysis_btn_union").hide();
-                break;
-
-            case "buffer":
-                $("#params").show();
-
-                $("#attributesParams").hide();
-                $("#analysis_btn_union").hide();
-                $("#analysis_btn_intersect").hide();
+                $("#spatialParams").hide();
+                $("#attributes_type_label").hide();
                 break;
 
             case "attributes":
@@ -91,18 +97,34 @@ $(document).ready(function () {
                 $("#params").hide();
                 $("#analysis_btn_union").hide();
                 $("#analysis_btn_intersect").hide();
+                $("#spatialParams").hide();
+                $("#attributes_type_label").hide();
                 break;
 
             case "spatial":
                 $("#spatialParams").show();
                 $("#attributes_type_label").show();
-                
+
                 $("#attributesParams").hide();
                 $("#attributes_analysis_input").hide();
                 $("#params").hide();
                 $("#analysis_btn_union").hide();
                 $("#analysis_btn_intersect").hide();
                 break;
+
+            case "query":
+
+                $("#query_btn_intersect").show();
+
+                $("#spatialParams").hide();
+                $("#attributes_type_label").hide();
+                $("#attributesParams").hide();
+                $("#attributes_analysis_input").hide();
+                $("#params").hide();
+                $("#analysis_btn_union").hide();
+                $("#analysis_btn_intersect").hide();
+                break;
+
         }
     });
 });

@@ -6,6 +6,12 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import { Fill, Stroke, Style, Text } from 'ol/style';
 
+import { platformModifierKeyOnly } from 'ol/events/condition';
+import { DragBox, Select } from 'ol/interaction';
+// import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
+// import {OSM, Vector as VectorSource} from 'ol/source';
+
+
 // 成都市区 http://localhost:8080/geoserver/Test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Test%3A5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301&maxFeatures=50&outputFormat=text%2Fjavascript
 // 北京市区 http://localhost:8080/geoserver/Test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Test%3A6bff876faa82c51aee79068a68d4a814af8c304a0876a08c0e8fe16e5645fde4&maxFeatures=50&outputFormat=text%2Fjavascript
 //参数字段  
@@ -19,14 +25,16 @@ var wfsParams = {
 };
 
 const map = new Map({
+
     target: 'map-container',
     view: new View({
         // projection:"EPSG:4326",  // 该设置不适用于经纬度地图
         center: [116.5, 39.5], // 设置地图的中心值  北京中心 [116.5, 39.5]  成都中心 [103.98, 30.52]  [12993238, 4811530]
-        zoom: 25    // 25 8
+        zoom: 25   // 25 8
     })
 });
 
+// 获得地图
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
     // url: "./data/features.json",
@@ -55,12 +63,12 @@ map.addLayer(vectorLayer);
 
 
 var highlightStyle = new Style({
-    stroke: new Stroke({
-        color: '#f00',
-        width: 1
-    }),
+    // stroke: new Stroke({
+    //     color: '#FFB6C1',
+    //     width: 1
+    // }),
     fill: new Fill({
-        color: 'rgba(255,0,0,0.1)'
+        color: 'rgba(0,0,255,0.5)'
     }),
     text: new Text({
         font: '12px Calibri,sans-serif',
@@ -93,7 +101,7 @@ var displayFeatureInfo = function (pixel) {
     if (feature) {
         info.innerHTML = feature.getId() + ': ' + feature.get('name');
     } else {
-        info.innerHTML = '&nbsp;';
+        info.innerHTML = '&nbsp';
     }
 
     if (feature !== highlight) {
@@ -333,3 +341,114 @@ $("#analysis_btn_spatial").click(function () {
         highlight = feature;
     }
 });
+
+
+// 框选查询
+$("#query_btn_intersect").click(function () {
+
+    // 增加地图框选功能
+    // a normal select interaction to handle click
+    var select = new Select();
+    map.addInteraction(select);
+
+    var selectedFeatures = select.getFeatures();
+
+    // a DragBox interaction used to select features by drawing boxes
+    var dragBox = new DragBox({
+        condition: platformModifierKeyOnly
+    });
+
+    map.addInteraction(dragBox);
+
+    dragBox.on('boxstart', function (evt) {
+        var minX = evt.coordinate[0];
+        var maxY = evt.coordinate[1];
+        document.getElementById("minX").innerHTML = minX;
+        document.getElementById("maxY").innerHTML = maxY;
+
+    });
+
+    dragBox.on('boxend', function (evt) {
+
+        var maxX = evt.coordinate[0];
+        var minY = evt.coordinate[1];
+        var minX = document.getElementById("minX").innerText;
+        var maxY = document.getElementById("maxY").innerText;
+
+        var params = {
+            "minX": minX,
+            "minY": minY,
+            "maxX": maxX,
+            "maxY": maxY,
+            "fid": "5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301"
+        };
+        console.log(params);
+        $.ajax({
+            type: 'post',
+            contentType: "application/json",
+            url: 'http://localhost:8899/bcgis/mapservice/query/spatial',
+            data: JSON.stringify(params),
+            success: function (data) {
+                vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+                var vectorLayer2 = new VectorLayer({
+                    source: vectorSource,
+                    style: highlightStyle
+                });
+                map.addLayer(vectorLayer2);
+            },
+            error: function (err) {
+                console.log('err: ');
+                console.log(JSON.stringify(err));
+            }
+        });
+
+        var rotation = map.getView().getRotation();
+        var oblique = rotation % (Math.PI / 2) !== 0;
+        var candidateFeatures = oblique ? [] : selectedFeatures;
+        var extent = dragBox.getGeometry().getExtent();
+        vectorSource.forEachFeatureIntersectingExtent(extent, function (feature) {
+            candidateFeatures.push(feature);
+        });
+
+        if (oblique) {
+            var anchor = [0, 0];
+            var geometry = dragBox.getGeometry().clone();
+            geometry.rotate(-rotation, anchor);
+            var extent$1 = geometry.getExtent();
+            candidateFeatures.forEach(function (feature) {
+                var geometry = feature.getGeometry().clone();
+                geometry.rotate(-rotation, anchor);
+                if (geometry.intersectsExtent(extent$1)) {
+                    selectedFeatures.push(feature);
+                }
+            });
+        }
+
+    });
+
+    dragBox.on('boxstart', function () {
+        selectedFeatures.clear();
+    });
+
+    var infoBox = document.getElementById('info');
+
+    selectedFeatures.on(['add', 'remove'], function () {
+        var names = selectedFeatures.getArray().map(function (feature) {
+            return feature.get('name');
+        });
+        if (names.length > 0) {
+            infoBox.innerHTML = names.join(', ');
+        } else {
+            infoBox.innerHTML = 'No countries selected';
+        }
+    });
+});
+
+
+
+
+
+
+
+
+
