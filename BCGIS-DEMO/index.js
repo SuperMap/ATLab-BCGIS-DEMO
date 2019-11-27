@@ -37,18 +37,18 @@ const map = new Map({
 // 获得地图
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
-    // url: "./data/features.json",
-    loader: function (extent, resolution, projection) {  //加载函数  
-        var url = "http://localhost:8080/geoserver/wfs";
-        $.ajax({
-            url: url,
-            data: $.param(wfsParams),   //传参  
-            type: "GET",
-            dataType: "jsonp",   //解决跨域的关键  
-            jsonpCallback: "loadFeatures"  //回调  
+    url: "./data/beijing.json",
+    // loader: function (extent, resolution, projection) {  //加载函数  
+    //     var url = "http://localhost:8080/geoserver/wfs";
+    //     $.ajax({
+    //         url: url,
+    //         data: $.param(wfsParams),   //传参  
+    //         type: "GET",
+    //         dataType: "jsonp",   //解决跨域的关键  
+    //         jsonpCallback: "loadFeatures"  //回调  
 
-        });
-    },
+    //     });
+    // },
     projection: "EPSG:4326"
 });
 
@@ -61,27 +61,27 @@ var vectorLayer = new VectorLayer({
 });
 map.addLayer(vectorLayer);
 
-
 var highlightStyle = new Style({
-    // stroke: new Stroke({
-    //     color: '#FFB6C1',
-    //     width: 1
-    // }),
+    stroke: new Stroke({
+        color: '#f0f',
+        width: 1
+    }),
     fill: new Fill({
-        color: 'rgba(0,0,255,0.5)'
+        color: 'rgba(255，0，255, 0.1)'
     }),
     text: new Text({
         font: '12px Calibri,sans-serif',
         fill: new Fill({
-            color: '#000'
+            color: '#f0f'
         }),
         stroke: new Stroke({
-            color: '#f00',
+            color: '#f0f',
             width: 3
         })
     })
 });
 
+// 这个时定义高亮显示的  把 下面注释掉之后，在选中的时候就不会出现高亮显示额
 var featureOverlay = new VectorLayer({
     source: new VectorSource(),
     map: map,
@@ -100,8 +100,9 @@ var displayFeatureInfo = function (pixel) {
     var info = document.getElementById('info');
     if (feature) {
         info.innerHTML = feature.getId() + ': ' + feature.get('name');
+        console.log(feature);
     } else {
-        info.innerHTML = '&nbsp';
+        // info.innerHTML = '&nbsp';
     }
 
     if (feature !== highlight) {
@@ -321,7 +322,7 @@ $("#analysis_btn_spatial").click(function () {
             vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
             var vectorLayer2 = new VectorLayer({
                 source: vectorSource,
-                style: highlightStyle
+                // style: highlightStyle
             });
             map.addLayer(vectorLayer2);
         },
@@ -392,7 +393,7 @@ $("#query_btn_intersect").click(function () {
                 vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
                 var vectorLayer2 = new VectorLayer({
                     source: vectorSource,
-                    style: highlightStyle
+                    // style: highlightStyle  // 这个增加的图层显示效果是将全部的数据进行图层叠加
                 });
                 map.addLayer(vectorLayer2);
             },
