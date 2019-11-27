@@ -1,14 +1,13 @@
-package com.supermap.atlab;
-
+import com.supermap.atlab.MyResource;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTestNg;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 import javax.ws.rs.core.Application;
 
 import static org.junit.Assert.assertEquals;
 
-public class MyResourceTest extends JerseyTestNg.ContainerPerClassTest {
+public class MyResourceTest extends JerseyTest {
 
     @Override
     protected Application configure() {
