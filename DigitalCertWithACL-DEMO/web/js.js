@@ -66,7 +66,7 @@ $(document).ready(function () {
 
     $("#ECert_input").change(function () {
         var objFiles = document.getElementById("ECert_input");
-        var fileName = objFiles.files[0].name;
+                var fileName = objFiles.files[0].name;
         var isFileValide = true;    // 交互click和ajax之间的信息
 
         // 读取文件内容
