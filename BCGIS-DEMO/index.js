@@ -37,18 +37,18 @@ const map = new Map({
 // 获得地图
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
-    url: "./data/beijing.json",
-    // loader: function (extent, resolution, projection) {  //加载函数  
-    //     var url = "http://localhost:8080/geoserver/wfs";
-    //     $.ajax({
-    //         url: url,
-    //         data: $.param(wfsParams),   //传参  
-    //         type: "GET",
-    //         dataType: "jsonp",   //解决跨域的关键  
-    //         jsonpCallback: "loadFeatures"  //回调  
+    // url: "./data/beijing.json",
+    loader: function (extent, resolution, projection) {  //加载函数  
+        var url = "http://localhost:8080/geoserver/wfs";
+        $.ajax({
+            url: url,
+            data: $.param(wfsParams),   //传参  
+            type: "GET",
+            dataType: "jsonp",   //解决跨域的关键  
+            jsonpCallback: "loadFeatures"  //回调  
 
-    //     });
-    // },
+        });
+    },
     projection: "EPSG:4326"
 });
 
