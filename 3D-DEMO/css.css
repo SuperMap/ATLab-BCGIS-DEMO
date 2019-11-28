@@ -139,3 +139,7 @@ button {
     margin: 0 auto;
     background-color: aliceblue;
 }
+
+thead {
+    color: green;
+}

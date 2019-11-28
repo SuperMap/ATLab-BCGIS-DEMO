@@ -78,13 +78,21 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        跨域问题依赖。尚未解决-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>javax.servlet</groupId>-->
+<!--            <artifactId>javax.servlet-api</artifactId>-->
+<!--            <version>4.0.1</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.opendaylight.controller.thirdparty/org.apache.catalina.filters.CorsFilter &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.opendaylight.controller.thirdparty</groupId>-->
+<!--            <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>-->
+<!--            <version>7.0.42</version>-->
+<!--        </dependency>-->
+
 
     </dependencies>
     <properties>

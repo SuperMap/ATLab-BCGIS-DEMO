@@ -15,12 +15,14 @@
         <servlet-name>Jersey Web Application</servlet-name>
         <url-pattern>/webapi/*</url-pattern>
     </servlet-mapping>
-    <filter>
-        <filter-name>CorsFilter</filter-name>
-        <filter-class>com.supermap.atlab.blockchain.CorsFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>CorsFilter</filter-name>
-        <url-pattern>/webapi/*</url-pattern>
-    </filter-mapping>
+
+<!--    跨域设置，尚未解决-->
+<!--    <filter>-->
+<!--        <filter-name>CorsFilter</filter-name>-->
+<!--        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>-->
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>CorsFilter</filter-name>-->
+<!--        <url-pattern>/webapi/*</url-pattern>-->
+<!--    </filter-mapping>-->
 </web-app>

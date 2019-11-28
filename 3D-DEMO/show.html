@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>s3m模型展示</title>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js.js"></script>
+    <link rel="stylesheet" href="css.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>模型展示</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/tooltip.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+</head>
+
+<body>
+<div id="header"></div>
+<div id="option">
+    <form id="show_s3m">
+        <fieldset>
+            <p id="getSaveFileName">
+                <label for="saveFileName">输入文件名: </label>
+                <input type="select" id="input_SaveFileName" value="model001"></input>
+            </p>
+
+            <!-- 展示地图 首先给出查询后的 版本、修改时间和超链接，点击链接查看 -->
+            <input type="button" id="btn_show_s3m_moudle" value="查询">
+            <div id="version_list"></div>
+        </fieldset>
+    </form>
+</div>
+
+<div id="cesiumContainer"></div>
+
+</body>
+
+</html>
+
+<script type="text/javascript">
+    function onload(Cesium) {
+        $("#cesiumContainer").hide();
+
+    }
+</script>
