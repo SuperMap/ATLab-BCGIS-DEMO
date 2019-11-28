@@ -3,3 +3,4 @@ package-lock.json
 DigitalCertWithACL-DEMO/web/msp/
 DigitalCertWithACL-DEMO/web/tmp/
 DigitalCertWithACL-DEMO/server/fabric-client-kv-orgb/
+server/target/

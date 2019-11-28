@@ -1,7 +1,7 @@
 // enroll
 
-// var RESTURL = "http://127.0.0.1:4000";
-// var FileURL = "http://127.0.0.1:4444";
+// var RESTURL = "http://127.0.0.1:7002";
+// var FileURL = "http://127.0.0.1:7001";
 var RESTURL = "http://175.154.161.50:7002";
 var FileURL = "http://175.154.161.50:7001";
 
@@ -30,6 +30,14 @@ $(document).ready(function () {
         //         <li><a href=\"getDataFromHBase.html\" id=\"getDataFromHBase_bar\">获取HBASE数据</a></li> \
 
     $("#enroll_btn").click(function () {
+        if ($("#username_input").val() == "") {
+            alert("该用户名已注册或无效，请尝试其他用户名");
+            return;
+        }
+        if ($("#ou_input").val() == "") {
+            alert("请输入区划代码");
+            return;
+        }
         $.ajax({
             type: 'post',
             url: RESTURL + '/users',
@@ -48,12 +56,22 @@ $(document).ready(function () {
                 let triggerDelay = 100;
                 let removeDelay = 1000;
                 //存放多个下载的url，
-                let url_arr = [FileURL + "/msp/" + username, FileURL + "/msp/" + data.filename];
+                let certPath = FileURL + "/msp/" + username;
+                let privKeyPath = FileURL + "/msp/" + data.filename;
+                let url_arr = [certPath, privKeyPath];
 
                 url_arr.forEach(function (item, index) {
                     _createIFrame(item, index * triggerDelay, removeDelay);
                 })
 
+                $("#download_cert").html(" \
+                证书文件</span><a href=\"" + certPath + "\">下载</a> <br/> \
+                ");
+
+                $("#download_privKey").html(" \
+                私钥文件</span><a href=\"" + privKeyPath + "\">下载</a> \
+                ");
+                
                 $("#indexJump_p").show();
 
             },
