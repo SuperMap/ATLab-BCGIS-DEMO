@@ -7,9 +7,6 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
-import java.io.File;
-
-import static org.junit.Assert.assertEquals;
 
 public class BlockchainTest extends JerseyTest {
 

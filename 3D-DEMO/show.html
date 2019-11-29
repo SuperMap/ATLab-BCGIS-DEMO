@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="css.css">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
     <meta name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <!-- 以下部分为引用的 SuperMap iClient3D 的架包 -->
     <title>模型展示</title>
     <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link href="./css/pretty.css" rel="stylesheet">
@@ -20,23 +22,23 @@
 </head>
 
 <body>
-<div id="header"></div>
-<div id="option">
-    <form id="show_s3m">
-        <fieldset>
-            <p id="getSaveFileName">
-                <label for="saveFileName">输入文件名: </label>
-                <input type="select" id="input_SaveFileName" value="model001"></input>
-            </p>
+    <div id="header"></div>
+    <div id="option">
+        <form id="show_s3m">
+            <fieldset>
+                <p id="getSaveFileName">
+                    <label for="saveFileName">输入文件名: </label>
+                    <input type="select" id="input_SaveFileName" value="model001"></input>
+                </p>
 
-            <!-- 展示地图 首先给出查询后的 版本、修改时间和超链接，点击链接查看 -->
-            <input type="button" id="btn_show_s3m_moudle" value="查询">
-            <div id="version_list"></div>
-        </fieldset>
-    </form>
-</div>
+                <!-- 展示地图 首先给出查询后的 版本、修改时间和超链接，点击链接查看 -->
+                <input type="button" id="btn_show_s3m_moudle" value="查询">
+                <div id="version_list"></div>
+            </fieldset>
+        </form>
+    </div>
 
-<div id="cesiumContainer"></div>
+    <div id="cesiumContainer"></div>
 
 </body>
 
