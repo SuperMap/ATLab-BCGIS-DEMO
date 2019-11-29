@@ -7,9 +7,6 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
-import java.io.File;
-
-import static org.junit.Assert.assertEquals;
 
 public class BlockchainTest extends JerseyTest {
 
@@ -28,6 +25,6 @@ public class BlockchainTest extends JerseyTest {
     @Test
     public void putRecordTest() {
         final String result = target("blockchain").request().post(Entity.text(""), String.class);
-        Assert.assertEquals("Invoke finished successfully.", result);
+        Assert.assertEquals("success", result);
     }
 }

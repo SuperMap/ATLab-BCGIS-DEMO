@@ -32,16 +32,16 @@ organizations:
       - peer0
 
     adminPrivateKey:
-        path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/keystore/8f62dc9246ad04465ae36bafa78267828ef1688bf84ce9c19c69c4a36e60080a_sk
+        path: E:\crypto-config\peerOrganizations\orgb.example.com\users\Admin@orgb.example.com\msp\keystore\8f62dc9246ad04465ae36bafa78267828ef1688bf84ce9c19c69c4a36e60080a_sk
 
     signedCert:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/signcerts/Admin@orgb.example.com-cert.pem
+      path: E:\crypto-config\peerOrganizations\orgb.example.com\users\Admin@orgb.example.com\msp\signcerts\Admin@orgb.example.com-cert.pem
 
 orderers:
   Orderer0:
     url: grpcs://orderer0.example.com:7050
     tlsCACerts:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+      path: E:\crypto-config\ordererOrganizations\example.com\tlsca\tlsca.example.com-cert.pem
     grpcOptions:
       grpc-max-send-message-length: 15
       grpc.keepalive_time_ms: 360000
@@ -51,7 +51,7 @@ peers:
   peer0:
     url: grpcs://peer0.orgb.example.com:7051
     tlsCACerts:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/tlsca/tlsca.orgb.example.com-cert.pem
+      path: E:\crypto-config\peerOrganizations\orgb.example.com\tlsca\tlsca.orgb.example.com-cert.pem
     grpcOptions:
       grpc.http2.keepalive_time: 15
 

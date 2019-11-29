@@ -1,6 +1,6 @@
 package com.supermap.atlab;
 
-import java.io.File;
+import java.io.*;
 import java.security.MessageDigest;
 
 public class Utils {
@@ -54,7 +54,7 @@ public class Utils {
      * @param sourceStr 文件名中的特殊字符
      * @param targetStr 替换为该普通字符
      */
-    public void replaceFileName(String path, String sourceStr, String targetStr) {
+    public static void replaceFileName(String path, String sourceStr, String targetStr) {
         File files = new File(path);
         File[] fileList = files.listFiles();
         String names = "";
@@ -63,5 +63,20 @@ public class Utils {
             names += "\"" + res + "\", ";
         }
         System.out.println(names);
+    }
+
+    public static String inputStreamToString(InputStream inputStream){
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuffer buffer = new StringBuffer();
+        String line = "";
+        while (true){
+            try {
+                if (!((line = in.readLine()) != null)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            buffer.append(line);
+        }
+        return buffer.toString();
     }
 }
