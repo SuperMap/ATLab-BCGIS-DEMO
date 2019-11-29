@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.Utils;
+import com.supermap.atlab.storage.Hdfs;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -18,9 +19,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +67,8 @@ public class Blockchain {
 //                functionName,
 //                new String[]{key, value}
 //        );
+
+//        JSONArray jsonArray = readFile(filePath);
 
         String result =null;
         for(int i = 0; i < jsonArray.size(); i++){
@@ -145,7 +150,8 @@ public class Blockchain {
             JSONObject jsonObject = creatNodeList(new File(kmlFilePath), list);
             s3mNameList.add(jsonObject.get("href").toString());
         }
-        // 第三步 根据信息生成 Json 字符串
+        // 第三步 根据 s3m 文件信息生成 Json 字符串
+        Hdfs hdfs = new Hdfs();
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < kmlFileNameList.size(); i++){
             String tempSID = kmlFileNameList.get(i);
@@ -155,9 +161,14 @@ public class Blockchain {
             String absoluteS3mFilePath = filePath + s3mPath;
             File tmp = new File(absoluteS3mFilePath);
             String hash = null;
+            String fileExtName = Utils.getExtName(s3mPath);
             try {
                 FileInputStream in = new FileInputStream(tmp);
+                FileInputStream inHdfs = new FileInputStream(tmp);
                 hash = Utils.getSHA256(Utils.inputStreamToByteArray(in));
+
+                // 将 s3m 文件存储到 hdfs
+//                hdfs.hdfsUploadFile(inHdfs, fileExtName, hash);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -166,7 +177,7 @@ public class Blockchain {
             jsonObject.put("SID", SID);
             jsonObject.put("SHash", hash);
             jsonArray.add(i, jsonObject);
-            //TODO 这里需添加一步，在根据 s3m 文件计算 hash 时就应该将文件以 hash 为名存储到 hdfs
+
             try {
                 if (Files.exists(Paths.get(saveFileSting + "/" + hash))) {
                     continue;
