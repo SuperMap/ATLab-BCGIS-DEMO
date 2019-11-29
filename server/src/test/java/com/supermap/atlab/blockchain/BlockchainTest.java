@@ -28,6 +28,20 @@ public class BlockchainTest extends JerseyTest {
     @Test
     public void putRecordTest() {
         final String result = target("blockchain").request().post(Entity.text(""), String.class);
-        Assert.assertEquals("Invoke finished successfully.", result);
+        Assert.assertEquals("success", result);
+    }
+
+    @Test
+    public void getRecordBySelectorTest() {
+        final String record = target("blockchain/selector").request().get(String.class);
+        System.out.println(record);
+        Assert.assertNotNull(record);
+    }
+
+    @Test
+    public void delRecordTest() {
+        final String record = target("blockchain").request().delete(String.class);
+        System.out.println(record);
+        Assert.assertNotNull(record);
     }
 }

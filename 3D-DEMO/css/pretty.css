@@ -3,7 +3,7 @@ html, body, #cesiumContainer {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
     background-color: #f1f1f1;
 
     /* 禁止文字被鼠标选中 */
