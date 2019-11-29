@@ -71,11 +71,18 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/atlchain-sdk-0.0.3.jar</systemPath>
         </dependency>
+
+        <!--Unit Test Dependency-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
 
 <!--        跨域问题依赖。尚未解决-->

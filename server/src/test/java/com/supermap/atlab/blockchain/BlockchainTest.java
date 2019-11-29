@@ -1,22 +1,33 @@
 package com.supermap.atlab.blockchain;
 
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Assert;
 import org.junit.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import java.io.File;
 
-public class BlockchainTest {
+import static org.junit.Assert.assertEquals;
+
+public class BlockchainTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Blockchain.class);
+    }
 
     @Test
-    public void getRecord() {
+    public void getRecordTest() {
+        final String record = target("blockchain").request().get(String.class);
+        System.out.println(record);
+        Assert.assertNotNull(record);
+    }
 
-        String path = "/home/cy/Desktop/stair-bim/KMLModels";
-        File files = new File(path);
-        File[] fileList = files.listFiles();
-        String names = "";
-        for (File file : fileList) {
-            String res =  file.getName().replace("#", "%23");
-            names += "\"" + res + "\", ";
-        }
-        System.out.println(names);
+    @Test
+    public void putRecordTest() {
+        final String result = target("blockchain").request().post(Entity.text(""), String.class);
+        Assert.assertEquals("Invoke finished successfully.", result);
     }
 }
