@@ -113,7 +113,7 @@ public class Blockchain {
             @QueryParam("modelid") String key
     ) {
 //        String key = "modelidaa-sidaa";
-        String functionName = "GetHistoryByKey";
+        String functionName = "GetHistoryByKey2";
 
         String result = atlChain.query(
                 chaincodeName,
