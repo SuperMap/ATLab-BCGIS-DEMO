@@ -5,34 +5,35 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.Utils;
-import com.supermap.atlab.storage.Hdfs;
+import org.glassfish.jersey.media.multipart.BodyPart;
+import org.glassfish.jersey.media.multipart.BodyPartEntity;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+//import com.supermap.atlab.storage.Hdfs;
 
 @Path("/blockchain")
 public class Blockchain {
 
     private ATLChain atlChain;
-        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+    //    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
 
@@ -41,8 +42,10 @@ public class Blockchain {
     }
 
     @GET
-    public String GetRecord() {
-        String key = "model002-doorl1";
+    public String GetRecord(
+            @QueryParam("modelid") String key
+    ) {
+//        String key = "modelidaa-sidaa"; // "model002-doorl1";
         String functionName = "GetRecord";
 
         String result = atlChain.query(
@@ -53,42 +56,63 @@ public class Blockchain {
         return result;
     }
 
+    // TODO 接收json参数
     @POST
-    public String PutRecord() {
-        String filePath = "/home/cy/Desktop/stair-bim";
-        JSONArray jsonArray = readFile(filePath, "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m");
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public String PutRecord(
+            @FormDataParam("modelid") String modelid,
+            @FormDataParam("s3mid") String s3mid,
+            FormDataMultiPart formDataMultiPart
+    ) {
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
+        bodyParts.forEach(o -> {
+//            String name = o.getContentDisposition().getParameters().get("name");
+            String mediaType = o.getMediaType().toString();
 
-//        String key = "model001";
-//        String functionName = "PutRecord";
-//        String value = "{\"MID\":\"model001\",\"SID\":\"s001\",\"SHash\":\"shash\"}";
-//        String value = "\"GeoModel3D_0000000059470CB0.s3m\", \"GeoModel3D%23_514788146.s3m\", \"GeoModel3D_00000000401ABD30.s3m\", \"GeoModel3D_0000000059470B00.s3m\", \"GeoModel3D_00000000401AB6E0.s3m\", \"GeoModel3D%23_515870026.s3m\", \"GeoModel3D_000000005B306470.s3m\", \"GeoModel3D_00000000401AAA80.s3m\", \"GeoModel3D%23_515498919.s3m\", \"GeoModel3D_00000000401AC350.s3m\", \"GeoModel3D_00000000589B4A60.s3m\", \"GeoModel3D%23_515435356.s3m\", \"GeoModel3D_000000005B383EA0.s3m\", \"GeoModel3D_000000005B2CEDD0.s3m\", \"GeoModel3D_000000005B17AC00.s3m\", \"GeoModel3D%23_515748021.s3m\", \"GeoModel3D_000000003F8A7C70.s3m\", \"GeoModel3D%23_514864874.s3m\", \"GeoModel3D_000000005B305E90.s3m\", \"GeoModel3D_00000000583FDAB0.s3m\", \"GeoModel3D_000000005B306240.s3m\", \"GeoModel3D_000000005B2F29C0.s3m\", \"GeoModel3D_000000003F8A4290.s3m\", \"GeoModel3D_000000005B386AC0.s3m\", \"GeoModel3D_00000000401A94B0.s3m\", \"GeoModel3D_000000005B306450.s3m\", \"GeoModel3D_00000000401AC1B0.s3m\", \"GeoModel3D_0000000040126AC0.s3m\", \"GeoModel3D_000000005B17A6E0.s3m\", \"GeoModel3D_0000000058AD9BE0.s3m\", \"GeoModel3D_0000000040111230.s3m\", \"GeoModel3D%23_515652338.s3m\", \"GeoModel3D_000000005B2CEF70.s3m\", \"GeoModel3D%23_515394098.s3m\", \"GeoModel3D_00000000401A8600.s3m\", \"GeoModel3D%23_515362609.s3m\", \"GeoModel3D%23_514665277.s3m\", \"GeoModel3D%23_515605045.s3m\", \"GeoModel3D%23_514521583.s3m\", \"GeoModel3D_0000000059AFC230.s3m\", \"GeoModel3D_0000000058ADA250.s3m\"";
-//        String result = atlChain.invoke(
-//                chaincodeName,
-//                functionName,
-//                new String[]{key, value}
-//        );
+            if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
+//                String fileName = o.getContentDisposition().getFileName();
+                BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
+                InputStream inputStream = bodyPartEntity.getInputStream();
+                String hash = null;
+                try {
+                    hash = Utils.getSHA256(Utils.inputStreamToByteArray(inputStream));
+                    jsonArray.add(hash);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-//        JSONArray jsonArray = readFile(filePath);
+                // TODO hdfs存储
+                // 保存文件
+                Utils.saveFile(inputStream, "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/" + hash);
+            }
+        });
 
-        String result =null;
-        for(int i = 0; i < jsonArray.size(); i++){
-            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            String key = jsonObject.get("MID").toString() +  "-"  + jsonObject.get("SID").toString();
-            String functionName = "PutRecord";
-            String value = jsonArray.get(i).toString();
-             result = atlChain.invoke(
-                    chaincodeName,
-                    functionName,
-                    new String[]{key, value}
-            );
-        }
+        String functionName = "PutRecord";
+        String key = modelid + "-" + s3mid;
+        jsonObject.put("MID", modelid);
+        jsonObject.put("SID", s3mid);
+        jsonObject.put("SHash", jsonArray);
+
+        // example value:
+        // {"SHash":["b4ed34caf6b47ab999900760cb15f8b61b50560605291f65d1d52fcc155bd770","1cbab4479058ddc075f39938444dd516f15099d57597f725942b71e6bc11e994","b4ed34caf6b47ab999900760cb15f8b61b50560605291f65d1d52fcc155bd770","1cbab4479058ddc075f39938444dd516f15099d57597f725942b71e6bc11e994"],"MID":"modelid","SID":"sid"}
+        String value = jsonObject.toString();
+        String result = atlChain.invoke(
+                chaincodeName,
+                functionName,
+                new String[]{key, value}
+        );
+
         return result;
     }
 
     @Path("history")
     @GET
-    public String GetHistory() {
-        String key = "model001";
+    public String GetHistory(
+            @QueryParam("modelid") String key
+    ) {
+//        String key = "modelidaa-sidaa";
         String functionName = "GetHistoryByKey";
 
         String result = atlChain.query(
@@ -101,8 +125,17 @@ public class Blockchain {
 
     @Path("selector")
     @GET
-    public String GetRecordBySelector() {
-        String selector = "{\"MID\":\"model002\"}";
+    public String GetRecordBySelector(
+            @QueryParam("modelid") String modelid,
+            @QueryParam("s3mid") String s3mid
+
+    ) {
+        String selector = "";
+        if (s3mid == null) {
+            selector = "{\"MID\":\"" + modelid + "\"}";
+        } else {
+            selector = "{\"MID\":\"" + modelid + "\",\"SID\":\"" + s3mid + "\"}";
+        }
         String functionName = "GetRecordBySelector";
 
         String result = atlChain.query(
@@ -114,8 +147,9 @@ public class Blockchain {
     }
 
     @DELETE
-    public String DelRecord() {
-        String key = "\"model001-s001\"";
+    public String DelRecord(
+            @QueryParam("modelid") String key
+    ) {
         String functionName = "DelRecord";
 
         String result = atlChain.query(
@@ -130,30 +164,30 @@ public class Blockchain {
      * 根据文件夹路径解析 kml 文件，然后将 kml 文件名赋予给对应的 s3m 文件 ，最后保存在指定的文件夹里面
      * 返回值：Json
      */
-    private JSONArray readFile(String filePath, String saveFileSting){
+    private JSONArray readFile(String filePath, String saveFileSting) {
         String modelID = "model002";
         // 第一步 得到该文件下所有文件名
         File file = new File(filePath);
-        String [] fileName = file.list();
+        String[] fileName = file.list();
         List<String> kmlFileNameList = new ArrayList<>();
-        for(String str : fileName){
-            if(str.contains(".") && ".kml".equals(str.substring(str.lastIndexOf('.')))){
+        for (String str : fileName) {
+            if (str.contains(".") && ".kml".equals(str.substring(str.lastIndexOf('.')))) {
                 kmlFileNameList.add(str);
             }
         }
         // 第二步 解析 kml 文件，拿到 s3m 的 name 属性
         List<String> s3mNameList = new ArrayList<>();
         List<String> list = new ArrayList();
-        for(int i = 0; i < kmlFileNameList.size(); i++) {
+        for (int i = 0; i < kmlFileNameList.size(); i++) {
             String kmlFilePath = filePath + File.separator + kmlFileNameList.get(i);
             list.add("Link");
             JSONObject jsonObject = creatNodeList(new File(kmlFilePath), list);
             s3mNameList.add(jsonObject.get("href").toString());
         }
         // 第三步 根据 s3m 文件信息生成 Json 字符串
-        Hdfs hdfs = new Hdfs();
+//        Hdfs hdfs = new Hdfs();
         JSONArray jsonArray = new JSONArray();
-        for(int i = 0; i < kmlFileNameList.size(); i++){
+        for (int i = 0; i < kmlFileNameList.size(); i++) {
             String tempSID = kmlFileNameList.get(i);
             String SID = tempSID.substring(0, tempSID.lastIndexOf('.'));
             String tempS3mPath = s3mNameList.get(i);
@@ -164,7 +198,7 @@ public class Blockchain {
             String fileExtName = Utils.getExtName(s3mPath);
             try {
                 FileInputStream in = new FileInputStream(tmp);
-                FileInputStream inHdfs = new FileInputStream(tmp);
+//                FileInputStream inHdfs = new FileInputStream(tmp);
                 hash = Utils.getSHA256(Utils.inputStreamToByteArray(in));
 
                 // 将 s3m 文件存储到 hdfs
@@ -219,13 +253,14 @@ public class Blockchain {
 
     /**
      * 解析 kml 文件
+     *
      * @param file
      * @param list
      * @return
      */
-    private JSONObject creatNodeList(File file, List<String> list){
+    private JSONObject creatNodeList(File file, List<String> list) {
         JSONObject jsonObject = new JSONObject();
-        for(int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < list.size(); i++) {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             NodeList nodeList = null;
             try {

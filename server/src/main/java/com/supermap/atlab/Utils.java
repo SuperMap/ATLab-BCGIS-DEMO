@@ -3,6 +3,7 @@ package com.supermap.atlab;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.Objects;
 
 public class Utils {
 
@@ -84,5 +85,26 @@ public class Utils {
     public static String getExtName(String fileName) {
         int index = fileName.lastIndexOf('.');
         return fileName.substring(index, fileName.length());
+    }
+
+    public static void saveFile(InputStream inputStream, String path) {
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(path);
+            byte[] buffer = new byte[1024];
+            int temp = 0;
+            while ((temp = inputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, temp);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                inputStream.close();
+                Objects.requireNonNull(fileOutputStream).close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

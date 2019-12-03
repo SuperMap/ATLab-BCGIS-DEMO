@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--    <meta charset="utf-8">-->
+    <title>s3m模型展示</title>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js.js"></script>
+    <link rel="stylesheet" href="./css.css">
+
+</head>
+
+<body>
+<div id="header"></div>
+<div id="option">
+    <form id="publish_form" enctype="multipart/form-data">
+        <fieldset>
+            <p>
+                <label for="input_modelid">模型ID: </label>
+                <input type="text" id="input_modelid" name="modelid" value="modelid"></input>
+            </p>
+            <p>
+                <label for="input_s3mid">S3M ID: </label>
+                <input type="text" id="input_s3mid" name="s3mid" value="sid"></input>
+            </p>
+            <p>
+                <label for="input_s3mid">选择文件: </label>
+                <input type="file" id="btn_file" name="file" multiple="multiple">
+            </p>
+            <p>
+                <input type="button" value="提交" id="btn_submit"/>
+            </p>
+        </fieldset>
+    </form>
+</div>
+</body>
+
+</html>

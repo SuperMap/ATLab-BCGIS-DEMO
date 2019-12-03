@@ -31,7 +31,7 @@ $(document).ready(function () {
 
     $("#enroll_btn").click(function () {
         if ($("#username_input").val() == "") {
-            alert("该用户名已注册或无效，请尝试其他用户名");
+            alert("用户名不能为空");
             return;
         }
         if ($("#ou_input").val() == "") {
@@ -49,8 +49,13 @@ $(document).ready(function () {
             success: function (data) {
                 console.log(data);
                 var username = $("#username_input").val();
-                $("#accountAddress_input").val(data.address);
-                alert($("#username_input").val() + "登记成功\n请保存好下载的证书和密钥文件\n请牢记账户地址:" + data.address);
+                if(!data.address){
+                    alert("该用户名已注册或无效，请尝试其他用户名");
+                    return;
+                } else {
+                    $("#accountAddress_input").val(data.address);
+                    alert($("#username_input").val() + "登记成功\n请保存好下载的证书和密钥文件\n请牢记账户地址:" + data.address);
+                }
 
                 // 下载多个文件
                 let triggerDelay = 100;
@@ -1244,7 +1249,7 @@ function FormatOutputTableDetail(data, txid) {
 
     var str = "";
     var keyName = "";
-    str += "<tr><td><b>交易ID：</b><span id=\"reg_parentID\">" + txid + "</span></td></tr>";
+    str += "<tr><td><b>交易ID：</b><span id=\"reg_parentID\">" + txid.substr(6) + "</span></td></tr>";
     if (!jsonData.hasOwnProperty("parentRecordID")) {
         str += "<tr><td><b>父交易ID： </b>" + jsonData["parentTxID"] + "</td></tr>";
     } else {
