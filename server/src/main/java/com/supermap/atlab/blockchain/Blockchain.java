@@ -33,6 +33,7 @@ public class Blockchain {
 
     private ATLChain atlChain;
     final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
     //    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -61,48 +62,59 @@ public class Blockchain {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String PutRecord(
             @FormDataParam("modelid") String modelid,
-            @FormDataParam("s3mid") String s3mid,
             FormDataMultiPart formDataMultiPart
     ) {
         JSONObject jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
+        JSONArray jsonArraySHash = new JSONArray();
+        JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
         bodyParts.forEach(o -> {
-//            String name = o.getContentDisposition().getParameters().get("name");
             String mediaType = o.getMediaType().toString();
-
             if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
-//                String fileName = o.getContentDisposition().getFileName();
                 BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
+                String fileName = o.getContentDisposition().getFileName();
+                jsonArrayS3m.add(fileName.substring(0, fileName.lastIndexOf('.')));
                 InputStream inputStream = bodyPartEntity.getInputStream();
                 String hash = null;
                 try {
                     hash = Utils.getSHA256(Utils.inputStreamToByteArray(inputStream));
-                    jsonArray.add(hash);
+                    jsonArraySHash.add(hash);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 // TODO hdfs存储
                 // 保存文件
-                Utils.saveFile(inputStream, "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/" + hash);
+                Utils.saveFile(inputStream, s3mDirPath + hash);
             }
         });
 
         String functionName = "PutRecord";
-        String key = modelid + "-" + s3mid;
-        jsonObject.put("MID", modelid);
-        jsonObject.put("SID", s3mid);
-        jsonObject.put("SHash", jsonArray);
-
-        // example value:
-        // {"SHash":["b4ed34caf6b47ab999900760cb15f8b61b50560605291f65d1d52fcc155bd770","1cbab4479058ddc075f39938444dd516f15099d57597f725942b71e6bc11e994","b4ed34caf6b47ab999900760cb15f8b61b50560605291f65d1d52fcc155bd770","1cbab4479058ddc075f39938444dd516f15099d57597f725942b71e6bc11e994"],"MID":"modelid","SID":"sid"}
+        jsonObject.put("SHash", jsonArraySHash);
         String value = jsonObject.toString();
+
+        // 保存完整模型记录
         String result = atlChain.invoke(
                 chaincodeName,
                 functionName,
-                new String[]{key, value}
+                new String[]{modelid, value}
         );
+
+        // 保存单个s3m记录
+        for (int i = 0; i < jsonArrayS3m.size(); i++) {
+            String key = modelid + "-" + jsonArrayS3m.get(i);
+            jsonObject = new JSONObject();
+            jsonObject.put("MID", modelid);
+            jsonObject.put("SID", jsonArrayS3m.get(i));
+            jsonObject.put("SHash", jsonArraySHash.get(i));
+            value = jsonObject.toString();
+
+            result = atlChain.invoke(
+                    chaincodeName,
+                    functionName,
+                    new String[]{key, value}
+            );
+        }
 
         return result;
     }
@@ -110,10 +122,10 @@ public class Blockchain {
     @Path("history")
     @GET
     public String GetHistory(
-            @QueryParam("modelid") String key
+            @QueryParam("key") String key
     ) {
 //        String key = "modelidaa-sidaa";
-        String functionName = "GetHistoryByKey2";
+        String functionName = "GetHistoryByKey";
 
         String result = atlChain.query(
                 chaincodeName,
@@ -143,6 +155,25 @@ public class Blockchain {
                 functionName,
                 new String[]{selector}
         );
+
+        // 获取s3m文件名
+        JSONArray resultJsonArray = JSONArray.parseArray(result);
+        resultJsonArray.get(0);
+        for (Object o : resultJsonArray) {
+            JSONObject jsonObject = (JSONObject) o;
+            JSONObject recordJSON = (JSONObject) jsonObject.get("Record");
+            JSONArray shashList = (JSONArray) recordJSON.get("SHash");
+            for (Object hashObj : shashList) {
+                if(!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
+                    System.out.println(hashObj + "不存在，需要下载");
+                    if (!getFileFromHdfs()){
+                        return "{\"message\":\"" + hashObj + "不存在\"}";
+                    }
+                }
+            }
+        }
+
+        // 直接返回区块链查询结果，具体使用由客户端处理
         return result;
     }
 
@@ -177,7 +208,7 @@ public class Blockchain {
         }
         // 第二步 解析 kml 文件，拿到 s3m 的 name 属性
         List<String> s3mNameList = new ArrayList<>();
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i < kmlFileNameList.size(); i++) {
             String kmlFilePath = filePath + File.separator + kmlFileNameList.get(i);
             list.add("Link");
@@ -246,7 +277,6 @@ public class Blockchain {
             f.renameTo(nf); // 修改文件名
         } catch (Exception err) {
             err.printStackTrace();
-            return null;
         }
         return newFilePath;
     }
@@ -292,5 +322,9 @@ public class Blockchain {
             }
         }
         return jsonObject;
+    }
+
+    private boolean getFileFromHdfs() {
+        return false;
     }
 }
