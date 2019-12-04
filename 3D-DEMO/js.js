@@ -3,26 +3,36 @@
  */
 $(document).ready(function () {
     // 导航栏
-    $("#header").html("<ul> \
-        <li><a href=\"\"><b> >>== 区块链 s3m 展示系统 ==<< </b></a></li> \
-        <li><a href=\"show.html\" id=\"index_bar\">显示 s3m </a></li> \
-        <li><a href=\"publishS3M.html\" id=\"mappublish_bar\">发布 s3m </a></li> \
-        </ul>");
+    $("#header").html('<ul> \
+        <li><a href=""><b> >>== 区块链 s3m 展示系统 ==<< </b></a></li> \
+        <li><a href="show.html" id="index_bar">显示 s3m </a></li> \
+        <li><a href="publish.html" id="mappublish_bar">发布 s3m </a></li> \
+        </ul>');
 
 
     $("#btn_show_s3m_moudle").click(function creatTab() {
+        let modelid = $("#modelid").val();
+        let s3mid = $("#sid").val();
+        var tab = '<table border=1 width="500" cellpadding="10" align="center">'
+        tab += "<caption>历史版本查询</caption>";
+        tab += "<tr><th>版本号</th>\
+                            <th>修改时间</th>";
+
+        let params = "";
+        if (s3mid != "") {
+            params = "?key=" + modelid + "-" + s3mid;
+        } else {
+            params = "?key=" + modelid;
+        }
         $.ajax({
             type: 'get',
             // contentType: "application/json",
-            url: 'http://172.16.15.66:8081/server_war_exploded/webapi/blockchain/history',
+            url: "http://localhost:8081/server_war_exploded/webapi/blockchain/history" + params,
             // data: JSON.stringify(params),
             success: function (data) {
                 console.log(data);
                 let recoreds = JSON.parse(data);
-                var tab = '<table border=1 width="500" cellpadding="10" align="center">'
-                tab += "<caption>历史版本查询</caption>";
-                tab += "<tr><th>版本号</th>\
-                            <th>修改时间</th>"
+
                 for (var i = 0; i < recoreds.length; i++) {
                     tab += '<tr>'
                     for (var j = 0; j < 2; j++) {
@@ -47,17 +57,24 @@ $(document).ready(function () {
     });
 
     function show(mapid) {
+        let modelid = $("#modelid").val();
+        let s3mid = $("#sid").val();
+        let params = "";
+        if (s3mid != "") {
+            params = "?key=" + modelid + "-" + s3mid;
+        } else {
+            params = "?key=" + modelid;
+        }
+
         //初始化viewer部件
         $("#cesiumContainer").show();
         $("#option").hide();
-
         $.ajax({
             type: 'get',
             // contentType: "application/json",
-            url: 'http://172.16.15.66:8081/server_war_exploded/webapi/blockchain/history',
+            url: "http://localhost:8081/server_war_exploded/webapi/blockchain/history" + params,
             // data: JSON.stringify(params),
             success: function (data) {
-                // data = "{\"Record\":[" + data + "]}";
                 let recoreds = JSON.parse(data);
                 var viewer = new Cesium.Viewer('cesiumContainer');
                 var scene = viewer.scene;
@@ -73,7 +90,7 @@ $(document).ready(function () {
                         }
                     });
 
-                    var s3mFilePath = recoreds[mapid]["Record"];
+                    var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
 
                     // 定义数据展示的位置
                     var points = [116.395074412521, 40.0167102653286, 39.4119813283905];
@@ -109,9 +126,9 @@ $(document).ready(function () {
         });
     }
 
-    $('body').on('click', '.showclass', function(){
+    $('body').on('click', '.showclass', function () {
         // 获取鼠标点击元素的 id
-        $(document).click(function(e) { // 在页面任意位置点击而触发此事件
+        $(document).click(function (e) { // 在页面任意位置点击而触发此事件
             var v_id = $(e.target).attr('id');
             show($("#" + v_id).html().trim());
             $(document).unbind("click");
@@ -131,21 +148,20 @@ $(document).ready(function () {
     //     return false; // 必须返回false，否则表单会自己再做一次提交操作，并且页面跳转
     // }
 
-    $("#btn_submit").on('click', function submitForm(){
+    $("#btn_submit").on('click', function submitForm() {
         var form = new FormData(document.getElementById("publish_form"));
         $.ajax({
-            url: "http://172.16.15.66:8081/server_war_exploded/webapi/blockchain",
+            url: "http://localhost:8081/server_war_exploded/webapi/blockchain",
             type: "post",
             data: form,
-            processData:false,
-            contentType:false,
-            success:function(data){
-                window.clearInterval(2);
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                alert(data);
                 console.log(data);
             },
-            error:function(e){
+            error: function (e) {
                 alert("错误！！");
-                window.clearInterval(2);
             }
         });
     });
@@ -215,7 +231,56 @@ $(document).ready(function () {
             }
         });
     });
+
+    // 出现 ajax 请求，将获取的路径返回给后端，让后端完成数据的存储过程，最后返回一个值表明数据存储完毕即可
+    // $("#btn_saveFile").click(function () {
+
+    //     // var params = document.getElementById("input_getFilePath").value;
+
+    //     // $.ajax({
+    //     //     type: 'post',
+    //     //     contentType: "application/json",
+    //     //     url: 'http://localhost:8899/bcgis/mapservice/wms/publish',
+    //     //     data: JSON.stringify(params),
+    //     //     success: function (data) {
+    //     //         console.log('data: ' + JSON.stringify(data));
+    //     //     },
+    //     //     error: function (err) {
+    //     //         console.log('err: ');
+    //     //         console.log(JSON.stringify(err));
+    //     //     }
+    //     // });
+
+    //     alert("文件保存完毕，请点击返回")
+
+    // });
+
 });
 
+
+// <!-- 字母 td 指表格数据（table data），即数据单元格的内容 -->
+// <!-- cellpadding 定义表格的宽度 -->
+// <!-- align 让表格居中显示 -->
+// <!-- <table border="1" cellpadding="10" align="center">
+//     <caption>历史版本查询</caption>
+//     <thead>
+//         <tr>
+//             <th>版本号</th>
+//             <th>修改时间</th>
+//             <th>查询链接</th>
+//         </tr>
+//     </thead>
+//     <tr>
+//         <td>
+//             Ver_1.0.0 
+//         </td>
+//         <td>
+//             2019.11.28
+//         </td>
+//         <td>
+//             查询
+//         </td>
+//     </tr>
+// </table> -->
 
 
