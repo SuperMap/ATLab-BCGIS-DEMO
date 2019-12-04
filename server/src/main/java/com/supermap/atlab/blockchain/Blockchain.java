@@ -32,8 +32,8 @@ import java.util.List;
 public class Blockchain {
 
     private ATLChain atlChain;
-    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-    //    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+//    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+        final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
 
@@ -162,10 +162,12 @@ public class Blockchain {
 
     /**
      * 根据文件夹路径解析 kml 文件，然后将 kml 文件名赋予给对应的 s3m 文件 ，最后保存在指定的文件夹里面
-     * 返回值：Json
+     * @param filePath
+     * @param saveFilePath
+     * @return
      */
-    private JSONArray readFile(String filePath, String saveFileSting) {
-        String modelID = "model002";
+    public String parsingKmlToGetS3m(String modelID, String filePath, String saveFilePath) {
+//        String modelID = "model002";
         // 第一步 得到该文件下所有文件名
         File file = new File(filePath);
         String[] fileName = file.list();
@@ -212,43 +214,17 @@ public class Blockchain {
             jsonObject.put("SHash", hash);
             jsonArray.add(i, jsonObject);
 
+            // 将文件改名存到指定的位置
             try {
-                if (Files.exists(Paths.get(saveFileSting + "/" + hash))) {
+                if (Files.exists(Paths.get(saveFilePath + File.separator + SID + fileExtName))) {
                     continue;
                 }
-                Files.copy(Paths.get(absoluteS3mFilePath), Paths.get(saveFileSting + "/" + hash));
+                Files.copy(Paths.get(absoluteS3mFilePath), Paths.get(saveFilePath + File.separator + SID + fileExtName));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-//        System.out.println(jsonArray);
-        return jsonArray;
-    }
-
-    // 给文件的绝对路径  修改成新的文件名
-    private String fixFileName(String filePath, String newFileName) {
-        File f = new File(filePath);
-        if (!f.exists()) {
-            return null;
-        }
-        newFileName = newFileName.trim();
-        if ("".equals(newFileName) || newFileName == null) // 文件名不能为空
-            return null;
-        String newFilePath = null;
-        if (f.isDirectory()) { // 判断是否为文件夹
-            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName;
-        } else {
-            newFilePath = filePath.substring(0, filePath.lastIndexOf("/")) + "/" + newFileName
-                    + filePath.substring(filePath.lastIndexOf("."));
-        }
-        File nf = new File(newFilePath);
-        try {
-            f.renameTo(nf); // 修改文件名
-        } catch (Exception err) {
-            err.printStackTrace();
-            return null;
-        }
-        return newFilePath;
+        return "the save file location is : " + saveFilePath;
     }
 
     /**
