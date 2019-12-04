@@ -17,10 +17,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -161,13 +158,12 @@ public class Blockchain {
     }
 
     /**
-     * 根据文件夹路径解析 kml 文件，然后将 kml 文件名赋予给对应的 s3m 文件 ，最后保存在指定的文件夹里面
+     * 解析 kml 文件，然后将 kml 文件名赋予给对应的 s3m 文件 ，最后保存在指定的文件夹里面
      * @param filePath
      * @param saveFilePath
      * @return
      */
-    public String parsingKmlToGetS3m(String modelID, String filePath, String saveFilePath) {
-//        String modelID = "model002";
+    public String parsingKmlToModifyS3mFileName(String filePath, String saveFilePath) {
         // 第一步 得到该文件下所有文件名
         File file = new File(filePath);
         String[] fileName = file.list();
@@ -186,35 +182,14 @@ public class Blockchain {
             JSONObject jsonObject = creatNodeList(new File(kmlFilePath), list);
             s3mNameList.add(jsonObject.get("href").toString());
         }
-        // 第三步 根据 s3m 文件信息生成 Json 字符串
-//        Hdfs hdfs = new Hdfs();
-        JSONArray jsonArray = new JSONArray();
+        // 第三步 根据 kml 文件修改 s3m 文件名
         for (int i = 0; i < kmlFileNameList.size(); i++) {
             String tempSID = kmlFileNameList.get(i);
             String SID = tempSID.substring(0, tempSID.lastIndexOf('.'));
             String tempS3mPath = s3mNameList.get(i);
             String s3mPath = tempS3mPath.substring(1);
             String absoluteS3mFilePath = filePath + s3mPath;
-            File tmp = new File(absoluteS3mFilePath);
-            String hash = null;
             String fileExtName = Utils.getExtName(s3mPath);
-            try {
-                FileInputStream in = new FileInputStream(tmp);
-//                FileInputStream inHdfs = new FileInputStream(tmp);
-                hash = Utils.getSHA256(Utils.inputStreamToByteArray(in));
-
-                // 将 s3m 文件存储到 hdfs
-//                hdfs.hdfsUploadFile(inHdfs, fileExtName, hash);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("MID", modelID);
-            jsonObject.put("SID", SID);
-            jsonObject.put("SHash", hash);
-            jsonArray.add(i, jsonObject);
-
-            // 将文件改名存到指定的位置
             try {
                 if (Files.exists(Paths.get(saveFilePath + File.separator + SID + fileExtName))) {
                     continue;
@@ -225,6 +200,41 @@ public class Blockchain {
             }
         }
         return "the save file location is : " + saveFilePath;
+    }
+
+    /**
+     * 根据 s3m 文件路径获取其信息，将其保存为 JsonArray 输出
+     * 返回值：Json
+     */
+    public JSONArray readS3m(String modelID, String filePath) {
+        File file = new File(filePath);
+        String[] fileName = file.list();
+        String hash = null;
+        int i = 0;
+        JSONArray jsonArray = new JSONArray();
+        for(String str : fileName){
+            File tempFile = new File(filePath + File.separator + str);
+            try{
+                // 将 s3m 文件存储到 hdfs
+//                FileInputStream inHdfs = new FileInputStream(tempFile);
+//                hdfs.hdfsUploadFile(inHdfs, fileExtName, hash);
+
+                FileInputStream in = new FileInputStream(tempFile);
+                hash = Utils.getSHA256(Utils.inputStreamToByteArray(in));
+                String SID = str.substring(0, str.lastIndexOf('.'));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("MID", modelID);
+                jsonObject.put("SID", SID);
+                jsonObject.put("SHash", hash);
+                jsonArray.add(i, jsonObject);
+                i++;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return jsonArray ;
     }
 
     /**
