@@ -215,7 +215,7 @@ public class Blockchain {
         for(String str : fileName){
             File tempFile = new File(filePath + File.separator + str);
             try{
-                // 将 s3m 文件存储到 hdfs
+                // TODO 将 s3m 文件存储到 hdfs
 //                FileInputStream inHdfs = new FileInputStream(tempFile);
 //                hdfs.hdfsUploadFile(inHdfs, fileExtName, hash);
 
