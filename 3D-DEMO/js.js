@@ -215,56 +215,7 @@ $(document).ready(function () {
             }
         });
     });
-
-    // 出现 ajax 请求，将获取的路径返回给后端，让后端完成数据的存储过程，最后返回一个值表明数据存储完毕即可
-    // $("#btn_saveFile").click(function () {
-
-    //     // var params = document.getElementById("input_getFilePath").value;
-
-    //     // $.ajax({
-    //     //     type: 'post',
-    //     //     contentType: "application/json",
-    //     //     url: 'http://localhost:8899/bcgis/mapservice/wms/publish',
-    //     //     data: JSON.stringify(params),
-    //     //     success: function (data) {
-    //     //         console.log('data: ' + JSON.stringify(data));
-    //     //     },
-    //     //     error: function (err) {
-    //     //         console.log('err: ');
-    //     //         console.log(JSON.stringify(err));
-    //     //     }
-    //     // });
-
-    //     alert("文件保存完毕，请点击返回")
-
-    // });
-
 });
 
-
-// <!-- 字母 td 指表格数据（table data），即数据单元格的内容 -->
-// <!-- cellpadding 定义表格的宽度 -->
-// <!-- align 让表格居中显示 -->
-// <!-- <table border="1" cellpadding="10" align="center">
-//     <caption>历史版本查询</caption>
-//     <thead>
-//         <tr>
-//             <th>版本号</th>
-//             <th>修改时间</th>
-//             <th>查询链接</th>
-//         </tr>
-//     </thead>
-//     <tr>
-//         <td>
-//             Ver_1.0.0 
-//         </td>
-//         <td>
-//             2019.11.28
-//         </td>
-//         <td>
-//             查询
-//         </td>
-//     </tr>
-// </table> -->
 
 
