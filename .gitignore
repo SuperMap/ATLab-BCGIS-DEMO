@@ -7,4 +7,8 @@ server/target/
 3D-DEMO/Build/
 3D-DEMO/js/
 3D-DEMO/css
+server/src/test/java/com/supermap/atlab/blockchain/TempTest.java
+server/src/main/resources/network-config-test.yaml
+.idea/
+
 
