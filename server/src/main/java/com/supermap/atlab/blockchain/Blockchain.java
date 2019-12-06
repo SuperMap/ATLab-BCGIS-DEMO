@@ -3,13 +3,10 @@ package com.supermap.atlab.blockchain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
-import com.supermap.atlab.utils.Utils;
 import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
-import org.glassfish.jersey.media.multipart.BodyPart;
-import org.glassfish.jersey.media.multipart.BodyPartEntity;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import com.supermap.atlab.utils.Utils;
+import org.glassfish.jersey.media.multipart.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -26,10 +23,11 @@ import java.util.List;
 public class Blockchain {
 
     private ATLChain atlChain;
-        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m";
-//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+
+    //    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
+    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -42,7 +40,7 @@ public class Blockchain {
     public String GetRecord(
             @QueryParam("modelid") String key
     ) {
-//        String key = "modelidaa-sidaa"; // "model002-doorl1";
+//        String key = "modelidaa-sidaDa"; // "model002-doorl1";
         String functionName = "GetRecord";
 
         String result = atlChain.query(
@@ -60,15 +58,22 @@ public class Blockchain {
             @FormDataParam("modelid") String modelid,
             FormDataMultiPart formDataMultiPart
     ) {
+
         Hdfs hdfs = new Hdfs();
-        JSONObject jsonObject = new JSONObject();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
+//        final String[] MIDs = new String[1];
         bodyParts.forEach(o -> {
             String mediaType = o.getMediaType().toString();
             String extName = "";
             if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
+
+//            if(mediaType.equals(MediaType.TEXT_PLAIN)){
+//                System.out.println("o.getHeaders()" + o.getHeaders());
+//                ContentDisposition contentDisposition = o.getContentDisposition();
+//                MIDs[0] = contentDisposition.getParameters().get("name");
+//            }else {
                 BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
                 String fileName = o.getContentDisposition().getFileName();
                 if (fileName.contains(".")) {
@@ -92,38 +97,28 @@ public class Blockchain {
 //                Utils.saveFile(inputStream, s3mDirPath + hash);
             }
         });
+        // 把这三个东西合成我想要的模块 然后进行模块的存储
+        // [{"SHash":"6d02d2dc74a58a57e80d706fe872cc4a772e364f7dcb171b80fc9cbcfa764f9c","MID":"modelidaa","SID":"doorl1"},
+        //  {"SHash":"1e654b15fdebd233c1ca9d31345b89a28efa9ed89101608e83cfc8aabba8444a","MID":"modelidaa","SID":"doorl1_1"}]
+//        String MID = MIDs[0]; // jsonArrayS3m  jsonArraySHash
 
-        String functionName = "PutRecord";
-        jsonObject.put("SHash", jsonArraySHash);
-        String value = jsonObject.toString();
-
-        // 保存完整模型记录
-        String result = atlChain.invoke(
-                chaincodeName,
-                functionName,
-                new String[]{modelid, value}
-        );
-
-        // 保存单个s3m记录
-        for (int i = 0; i < jsonArrayS3m.size(); i++) {
-            String key = modelid + "-" + jsonArrayS3m.get(i);
-            jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        for(int i = 0; i < jsonArrayS3m.size(); i++){
+            JSONObject jsonObject = new JSONObject();
             jsonObject.put("MID", modelid);
             jsonObject.put("SID", jsonArrayS3m.get(i));
             jsonObject.put("SHash", jsonArraySHash.get(i));
-            value = jsonObject.toString();
-
-            result = atlChain.invoke(
-                    chaincodeName,
-                    functionName,
-                    new String[]{key, value}
-            );
+            jsonArray.add(i, jsonObject);
         }
+        System.out.println(jsonArray);
 
-        return result;
+        // 保存单个模块
+
+        //保存完整模块
+        return "save file success";
     }
 
-    @Path("history")
+    @Path("/history")
     @GET
     public String GetHistory(
             @QueryParam("key") String key
@@ -139,7 +134,7 @@ public class Blockchain {
         return result;
     }
 
-    @Path("selector")
+    @Path("/selector")
     @GET
     public String GetRecordBySelector(
             @QueryParam("modelid") String modelid,
@@ -206,8 +201,9 @@ public class Blockchain {
      */
     public void storageS3mFile(String modelid) {
         JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
-        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
-        saveALLS3mMoudle(modelid, jsonToAll);
+        System.out.println(jsonArrayS3m);
+//        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
+//        saveALLS3mMoudle(modelid, jsonToAll);
     }
 
     /**
