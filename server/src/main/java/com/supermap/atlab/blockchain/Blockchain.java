@@ -3,7 +3,7 @@ package com.supermap.atlab.blockchain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
-import com.supermap.atlab.storage.Hdfs;
+//import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
 import org.glassfish.jersey.media.multipart.*;
@@ -59,7 +59,7 @@ public class Blockchain {
             FormDataMultiPart formDataMultiPart
     ) {
 
-        Hdfs hdfs = new Hdfs();
+//        Hdfs hdfs = new Hdfs();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
@@ -90,18 +90,12 @@ public class Blockchain {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 // hdfs存储
-                hdfs.hdfsUploadFile(inputStream, extName, hash);
+//                hdfs.hdfsUploadFile(inputStream, extName, hash);
                 // 保存文件
 //                Utils.saveFile(inputStream, s3mDirPath + hash);
             }
         });
-        // 把这三个东西合成我想要的模块 然后进行模块的存储
-        // [{"SHash":"6d02d2dc74a58a57e80d706fe872cc4a772e364f7dcb171b80fc9cbcfa764f9c","MID":"modelidaa","SID":"doorl1"},
-        //  {"SHash":"1e654b15fdebd233c1ca9d31345b89a28efa9ed89101608e83cfc8aabba8444a","MID":"modelidaa","SID":"doorl1_1"}]
-//        String MID = MIDs[0]; // jsonArrayS3m  jsonArraySHash
-
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < jsonArrayS3m.size(); i++){
             JSONObject jsonObject = new JSONObject();
@@ -110,11 +104,11 @@ public class Blockchain {
             jsonObject.put("SHash", jsonArraySHash.get(i));
             jsonArray.add(i, jsonObject);
         }
-        System.out.println(jsonArray);
-
         // 保存单个模块
-
+        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArray);
+        System.out.println(jsonToAll);
         //保存完整模块
+        saveALLS3mMoudle(modelid, jsonToAll);
         return "save file success";
     }
 
