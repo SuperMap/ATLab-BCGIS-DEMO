@@ -444,6 +444,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName/AddRecord', async fun
 
 	// invoke
 	let message = await invoke.invokeChaincode(peers, channel, chaincode, fcn, args, username, orgname);
+	console.log("================message", message);
 	res.send(recordID);
 });
 

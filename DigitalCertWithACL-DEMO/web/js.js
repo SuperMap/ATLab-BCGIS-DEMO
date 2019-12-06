@@ -1,7 +1,7 @@
 // enroll
 
-// var RESTURL = "http://127.0.0.1:7002";
-// var FileURL = "http://127.0.0.1:7001";
+// var RESTURL = "http://127.0.0.1:8002";
+// var FileURL = "http://127.0.0.1:8001";
 var RESTURL = "http://175.154.161.50:7002";
 var FileURL = "http://175.154.161.50:7001";
 
@@ -886,6 +886,9 @@ function FormatOutputUsual(data, txid) {
                         case "parentTxID":
                             keyName = "父交易ID";
                             break;
+                        case "regioncode":
+                            keyName = "区划代码";
+                            break;
                         case "price":
                             keyName = "价格";
                             break;
@@ -1069,6 +1072,9 @@ function FormatOutputUsualWithUrl(data, txid) {
                         case "addrrec":
                             keyName = "接收方地址";
                             break;
+                        case "regioncode":
+                            keyName = "区划代码";
+                            break;
                         case "addrsend":
                             keyName = "发送方地址";
                             break;
@@ -1249,7 +1255,7 @@ function FormatOutputTableDetail(data, txid) {
 
     var str = "";
     var keyName = "";
-    str += "<tr><td><b>交易ID：</b><span id=\"reg_parentID\">" + txid.substr(6) + "</span></td></tr>";
+    str += "<tr><td><b>交易ID：</b><span id=\"reg_parentID\">" + txid + "</span></td></tr>";
     if (!jsonData.hasOwnProperty("parentRecordID")) {
         str += "<tr><td><b>父交易ID： </b>" + jsonData["parentTxID"] + "</td></tr>";
     } else {
