@@ -3,3 +3,5 @@
 /lib
 /.settings
 /.idea
+/src/main/resources/network-config-test.yaml
+*.iml

@@ -3,7 +3,6 @@ package com.supermap.atlab.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.supermap.atlab.Utils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,7 +51,7 @@ public class Kml {
             String tempS3mPath = s3mNameList.get(i);
             String s3mPath = tempS3mPath.substring(1);
             String absoluteS3mFilePath = filePath + s3mPath;
-            String fileExtName = Utils.getExtName(s3mPath);
+            String fileExtName = Utils.getExtNameFromStr(s3mPath);
             try {
                 if (Files.exists(Paths.get(saveFilePath + File.separator + SID + fileExtName))) {
                     continue;

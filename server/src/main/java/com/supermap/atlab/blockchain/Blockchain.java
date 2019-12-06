@@ -1,28 +1,23 @@
 package com.supermap.atlab.blockchain;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
-import com.supermap.atlab.Utils;
+import com.supermap.atlab.utils.Utils;
 import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 //import com.supermap.atlab.storage.Hdfs;
@@ -72,10 +67,16 @@ public class Blockchain {
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
         bodyParts.forEach(o -> {
             String mediaType = o.getMediaType().toString();
+            String extName = "";
             if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
                 BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
                 String fileName = o.getContentDisposition().getFileName();
-                jsonArrayS3m.add(fileName.substring(0, fileName.lastIndexOf('.')));
+                if (fileName.contains(".")) {
+                    jsonArrayS3m.add(fileName.substring(0, fileName.lastIndexOf('.')));
+                    extName = Utils.getExtNameFromStr(fileName);
+                } else {
+                    jsonArrayS3m.add(fileName);
+                }
                 InputStream inputStream = bodyPartEntity.getInputStream();
                 String hash = null;
                 try {
@@ -85,10 +86,10 @@ public class Blockchain {
                     e.printStackTrace();
                 }
 
-                // TODO hdfs存储
-                hdfs.hdfsUploadFile(inputStream, "", "hdfs1205");
+                // hdfs存储
+                hdfs.hdfsUploadFile(inputStream, extName, hash);
                 // 保存文件
-                Utils.saveFile(inputStream, s3mDirPath + hash);
+//                Utils.saveFile(inputStream, s3mDirPath + hash);
             }
         });
 

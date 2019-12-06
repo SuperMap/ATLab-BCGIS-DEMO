@@ -1,4 +1,4 @@
-package com.supermap.atlab;
+package com.supermap.atlab.utils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -82,7 +82,7 @@ public class Utils {
      * @param fileName 文件名
      * @return
      */
-    public static String getExtName(String fileName) {
+    public static String getExtNameFromStr(String fileName) {
         int index = fileName.lastIndexOf('.');
         return fileName.substring(index, fileName.length());
     }

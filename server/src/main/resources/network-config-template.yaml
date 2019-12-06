@@ -1,0 +1,58 @@
+name: "Network-Config-Test"
+x-type: "hlfv1"
+description: "The network used in the integration tests"
+version: 1.0.0
+
+client:
+  organization: ORG_NAME
+  credentialStore:
+    path: "/tmp/hfc-kvs"
+    cryptoStore:
+      path: "/tmp/hfc-cvs"
+    wallet: wallet-name
+
+channels:
+  CHANNEL_NAME:
+    orderers:
+      - ORDERER_NAME
+    peers:
+      ORG_NAME:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    chaincodes:
+      - NAME:v1.0
+
+organizations:
+  ORG_NAME:
+    mspid: ORG_NAME
+    peers:
+      - PEER_URL
+
+    adminPrivateKey:
+        path: PATH/TO/*_sk
+
+    signedCert:
+      path: PATH/TO/*.pem
+
+
+orderers:
+  ORDERER_NAME:
+    url: grpcs://ORDERER_URL:7050
+    tlsCACerts:
+      path: PATH/TO/tlsca*.pem
+    grpcOptions:
+      grpc-max-send-message-length: 15
+      grpc.keepalive_time_ms: 360000
+      grpc.keepalive_timeout_ms: 180000
+
+peers:
+  ORG_NAME:
+    url: grpcs://PEER_URL:7051
+    tlsCACerts:
+      path: PATH/TO/tlsca*.pem
+    grpcOptions:
+      grpc.http2.keepalive_time: 15
+
