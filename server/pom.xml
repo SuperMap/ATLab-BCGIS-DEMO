@@ -93,35 +93,44 @@
             <version>${jersey.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.62</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.hadoop</groupId>-->
-<!--            <artifactId>hadoop-client</artifactId>-->
-<!--            <version>3.2.1</version>-->
-<!--        </dependency>-->
-
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>3.2.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jsp-api</groupId>
+                    <artifactId>javax-servlet.jsp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!--        跨域问题依赖。尚未解决-->
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api &ndash;&gt;-->
         <!--        <dependency>-->
         <!--            <groupId>javax.servlet</groupId>-->
         <!--            <artifactId>javax.servlet-api</artifactId>-->
         <!--            <version>4.0.1</version>-->
         <!--            <scope>provided</scope>-->
         <!--        </dependency>-->
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.opendaylight.controller.thirdparty/org.apache.catalina.filters.CorsFilter &ndash;&gt;-->
         <!--        <dependency>-->
         <!--            <groupId>org.opendaylight.controller.thirdparty</groupId>-->
         <!--            <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>-->
         <!--            <version>7.0.42</version>-->
         <!--        </dependency>-->
-
 
     </dependencies>
     <properties>

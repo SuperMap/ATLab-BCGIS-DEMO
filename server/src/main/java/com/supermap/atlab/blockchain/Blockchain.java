@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.Utils;
+import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
@@ -30,10 +31,10 @@ import java.util.List;
 public class Blockchain {
 
     private ATLChain atlChain;
-    //    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m";
-    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m";
+//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -64,6 +65,7 @@ public class Blockchain {
             @FormDataParam("modelid") String modelid,
             FormDataMultiPart formDataMultiPart
     ) {
+        Hdfs hdfs = new Hdfs();
         JSONObject jsonObject = new JSONObject();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
@@ -84,6 +86,7 @@ public class Blockchain {
                 }
 
                 // TODO hdfs存储
+                hdfs.hdfsUploadFile(inputStream, "", "hdfs1205");
                 // 保存文件
                 Utils.saveFile(inputStream, s3mDirPath + hash);
             }
