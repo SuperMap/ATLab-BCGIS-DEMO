@@ -3,7 +3,7 @@ package com.supermap.atlab.blockchain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
-import com.supermap.atlab.storage.Hdfs;
+//import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
 import org.glassfish.jersey.media.multipart.*;
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 //import com.supermap.atlab.storage.Hdfs;
@@ -58,22 +59,14 @@ public class Blockchain {
             @FormDataParam("modelid") String modelid,
             FormDataMultiPart formDataMultiPart
     ) {
-
-        Hdfs hdfs = new Hdfs();
+//        Hdfs hdfs = new Hdfs();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
-//        final String[] MIDs = new String[1];
         bodyParts.forEach(o -> {
             String mediaType = o.getMediaType().toString();
             String extName = "";
             if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
-
-//            if(mediaType.equals(MediaType.TEXT_PLAIN)){
-//                System.out.println("o.getHeaders()" + o.getHeaders());
-//                ContentDisposition contentDisposition = o.getContentDisposition();
-//                MIDs[0] = contentDisposition.getParameters().get("name");
-//            }else {
                 BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
                 String fileName = o.getContentDisposition().getFileName();
                 if (fileName.contains(".")) {
@@ -90,18 +83,13 @@ public class Blockchain {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 // hdfs存储
-                hdfs.hdfsUploadFile(inputStream, extName, hash);
+//                hdfs.hdfsUploadFile(inputStream, extName, hash);
                 // 保存文件
-//                Utils.saveFile(inputStream, s3mDirPath + hash);
+                InputStream in = bodyPartEntity.getInputStream();
+                Utils.saveFile(in, s3mDirPath + hash + extName);
             }
         });
-        // 把这三个东西合成我想要的模块 然后进行模块的存储
-        // [{"SHash":"6d02d2dc74a58a57e80d706fe872cc4a772e364f7dcb171b80fc9cbcfa764f9c","MID":"modelidaa","SID":"doorl1"},
-        //  {"SHash":"1e654b15fdebd233c1ca9d31345b89a28efa9ed89101608e83cfc8aabba8444a","MID":"modelidaa","SID":"doorl1_1"}]
-//        String MID = MIDs[0]; // jsonArrayS3m  jsonArraySHash
-
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < jsonArrayS3m.size(); i++){
             JSONObject jsonObject = new JSONObject();
@@ -110,11 +98,11 @@ public class Blockchain {
             jsonObject.put("SHash", jsonArraySHash.get(i));
             jsonArray.add(i, jsonObject);
         }
-        System.out.println(jsonArray);
-
         // 保存单个模块
-
+        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArray);
+        System.out.println(jsonToAll);
         //保存完整模块
+        saveALLS3mMoudle(modelid, jsonToAll);
         return "save file success";
     }
 
@@ -200,10 +188,23 @@ public class Blockchain {
      * @param modelid
      */
     public void storageS3mFile(String modelid) {
-        JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
-        System.out.println(jsonArrayS3m);
+
+        // TODO 单个与整体的存储测试
+//        JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
+////        System.out.println(jsonArrayS3m);
 //        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
+//        System.out.println(jsonToAll);
 //        saveALLS3mMoudle(modelid, jsonToAll);
+
+        // TODO 单个与整体的删除测试
+//        File file = new File("E:\\SuperMapData\\test\\saveTest");
+//        String[] fileName = file.list();
+//        List<String> deleteList = new ArrayList<>();
+//        for(String str : fileName){
+//            deleteList.add(str.substring(0, str.lastIndexOf(".")));
+//        }
+//        JSONArray deleteJson = deleteSingleS3m(modelid, deleteList);
+//        deletesALLS3mMoudle(modelid, deleteJson);
     }
 
     /**
@@ -212,7 +213,7 @@ public class Blockchain {
      * @param jsonArrayS3m
      * @return
      */
-    public JSONArray saveSingleS3m(String modelid, JSONArray jsonArrayS3m) {
+    private JSONArray saveSingleS3m(String modelid, JSONArray jsonArrayS3m) {
         JSONArray jsonArray = new JSONArray();
         String getRecord = "GetRecord";
         String putRecord = "PutRecord";
@@ -231,11 +232,11 @@ public class Blockchain {
                 String oldSHash = (String) jsonResult.get("SHash");
                 if (!modifySHash.equals(oldSHash)) {
                     String value = jsonObject.toString().replace(oldSHash, modifySHash);
-//                    String newResult = atlChain.invoke(
-//                            chaincodeName,
-//                            putRecord,
-//                            new String[]{key, value}
-//                    );
+                    String newResult = atlChain.invoke(
+                            chaincodeName,
+                            putRecord,
+                            new String[]{key, value}
+                    );
                     // 将修改之前的 hash 和修改之后的都要传入到整体信息里面
                     JSONObject temp = new JSONObject();
                     temp.put("old", oldSHash);
@@ -244,13 +245,13 @@ public class Blockchain {
                 }
             } else {
                 String value = jsonObject.toString();
-//                String newResult = atlChain.invoke(
-//                        chaincodeName,
-//                        putRecord,
-//                        new String[]{key, value}
-//                );
+                String newResult = atlChain.invoke(
+                        chaincodeName,
+                        putRecord,
+                        new String[]{key, value}
+                );
                 JSONObject temp = new JSONObject();
-                temp.put("old", "null");
+                temp.put("old", "empty");
                 temp.put("modify", modifySHash);
                 jsonArray.add(temp);
             }
@@ -261,11 +262,11 @@ public class Blockchain {
     }
 
     /**
-     * 模型整体存储信息
+     * 模型整体信息存储
      * @param modelid
      * @param jsonArrayS3m
      */
-    public void saveALLS3mMoudle(String modelid, JSONArray jsonArrayS3m) {
+    private void saveALLS3mMoudle(String modelid, JSONArray jsonArrayS3m) {
         String getRecord = "GetRecord";
         String putRecord = "PutRecord";
         String result = atlChain.query(
@@ -273,17 +274,20 @@ public class Blockchain {
                 getRecord,
                 new String[]{modelid}
         );
-        JSONObject jsonResult = JSONObject.parseObject(result);
-        String hash = jsonResult.get("SHash").toString();
-        JSONArray jsonArray = JSONArray.parseArray(hash);
+        JSONArray jsonArray = new JSONArray();
+        if (result.length() != 0) {
+            JSONObject jsonResult = JSONObject.parseObject(result);
+            String hash = jsonResult.get("SHash").toString();
+            jsonArray = JSONArray.parseArray(hash);
+        }
         for (Object json : jsonArrayS3m) {
             JSONObject temp = (JSONObject) JSONObject.parse(json.toString());
             String oldHash = temp.get("old").toString();
             String modifyHash = temp.get("modify").toString();
             // 该信息不为空 即代表之前存储过信息 ----> 分为修改和添加
             if (result.length() != 0) {
-                if (oldHash.equals("null")) {
-                    jsonArray.add(modelid);
+                if (oldHash.equals("empty")) {
+                    jsonArray.add(modifyHash);
                 } else {
                     jsonArray.remove(oldHash);
                     jsonArray.add(modifyHash);
@@ -293,26 +297,75 @@ public class Blockchain {
             }
         }
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("SHash", jsonArray);
+        String newValue = jsonObject.toString();
+        System.out.println("newValue" + newValue);
+        String s = atlChain.invoke(
+                chaincodeName,
+                putRecord,
+                new String[]{modelid, newValue}
+        );
+    }
+
+    /**
+     * 删除单个 s3m 信息
+     * @param modelid
+     * @param listKey
+     * @return
+     */
+    private JSONArray deleteSingleS3m(String modelid, List<String> listKey) {
+        String getRecord = "GetRecord";
+        String delRecord = "DelRecord";
+        JSONArray deleteJson = new JSONArray();
+        String key = null;
+        for (String str : listKey) {
+            key = modelid + "-" + str;
+            String result = atlChain.query(
+                    chaincodeName,
+                    getRecord,
+                    new String[]{key}
+            );
+            if (result.length() != 0) {
+                JSONObject jsonResult = JSONObject.parseObject(result);
+                String tempHash = (String) jsonResult.get("SHash");
+                deleteJson.add(tempHash);
+            }
+//            atlChain.query(
+//                    chaincodeName,
+//                    delRecord,
+//                    new String[]{key}
+//            );
+        }
+        return deleteJson;
+    }
+
+    /**
+     * 模型整体信息改变
+     * @param modelid
+     * @param deleteJson
+     */
+    private void deletesALLS3mMoudle(String modelid, JSONArray deleteJson){
+        String getRecord = "GetRecord";
+        String result = atlChain.query(
+                chaincodeName,
+                getRecord,
+                new String[]{modelid}
+        );
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        String hash = jsonResult.get("SHash").toString();
+        JSONArray jsonArray = JSONArray.parseArray(hash);
+        for(Object o : deleteJson){
+            jsonArray.remove(o);
+        }
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("SHash", jsonArray.toString());
         String newValue = jsonObject.toString();
+        System.out.println(newValue);
         System.out.println(jsonArray.size());
 //        atlChain.query(
 //                chaincodeName,
 //                putRecord,
 //                new String[]{modelid, newValue}
 //        );
-    }
-
-    // TODO 首先删除单个，然后修改对应整体记录
-    public void deleteSingleS3m(List<String> listKey) {
-//        String functionName = "DelRecord";
-//
-//
-//        String result = atlChain.query(
-//                chaincodeName,
-//                functionName,
-//                new String[]{key}
-//        );
-//        return result;
     }
 }

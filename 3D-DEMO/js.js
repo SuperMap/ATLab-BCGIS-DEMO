@@ -89,15 +89,17 @@ $(document).ready(function () {
                             roll: 9.353513519272383e-10
                         }
                     });
-
-                    var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
-
                     // 定义数据展示的位置
                     var points = [116.395074412521, 40.0167102653286, 39.4119813283905];
 
-                    // 循环输出图层
-                    for (var i = 0; i < s3mFilePath.length; i++) {
-                        var exam = '../s3m/' + s3mFilePath[i];
+                    var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
+                    // var temp = s3mFilePath.substring(3,s s3mFilePath.length - 3);
+                    // var ss = temp.split(",");
+                    console.log(typeof s3mFilePath);
+                    // consolel.log(typeof s3mFilePath === 'String');
+                    // console.log(s3mFilePath instanceof 'string');
+                    if (typeof s3mFilePath == 'string') {
+                        var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath + '.s3m'
                         var keymap = {};
                         keymap[exam] = [];
                         var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
@@ -105,7 +107,7 @@ $(document).ready(function () {
                         layer.enableLocalOffset = false;//禁止模型局部偏移
                         scene.primitives.add(layer);
                         var pillarState = new Cesium.DynamicObjectState({
-                            id: i,
+                            id: 0,
                             longitude: points[0],
                             latitude: points[1],
                             altitude: points[2],
@@ -114,6 +116,29 @@ $(document).ready(function () {
                         keymap[exam].push(pillarState);
                         for (var key in keymap) {
                             layer.updateObjectWithModel(key, keymap[key]);
+                        }
+                    } else {
+                        // 循环输出图层
+                        for (var i = 0; i < s3mFilePath.length; i++) {
+                            // var temp1 = ss[i];
+                            var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i] + '.s3m'
+                            var keymap = {};
+                            keymap[exam] = [];
+                            var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
+                            layer.updateInterval = 500;//动态图层更新时间
+                            layer.enableLocalOffset = false;//禁止模型局部偏移
+                            scene.primitives.add(layer);
+                            var pillarState = new Cesium.DynamicObjectState({
+                                id: i,
+                                longitude: points[0],
+                                latitude: points[1],
+                                altitude: points[2],
+                                scale: new Cesium.Cartesian3(1, 1, 1)
+                            });
+                            keymap[exam].push(pillarState);
+                            for (var key in keymap) {
+                                layer.updateObjectWithModel(key, keymap[key]);
+                            }
                         }
                     }
                 } catch (e) {
@@ -158,59 +183,14 @@ $(document).ready(function () {
             contentType: false,
             success: function (data) {
                 alert(data);
-                console.log(data);
+                // console.log(data);
+                // console.log('data: ' + JSON.stringify(data));
             },
             error: function (e) {
-                alert("错误！！");
+                // alert("错误！！");
             }
         });
     });
-
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    // 发布地图（时间为点击）
-    // $("#btn_submit").click(function () {
-    //     var objFiles = document.getElementById("btn_file");
-    //     var fileSize = objFiles.files.length;
-    //
-    //     var params = new Array();
-    //
-    //     for (var i = 0; i < fileSize; i++) {
-    //         var isFileValide = true;    // 交互click和ajax之间的信息
-    //         // 读取文件内容
-    //         var reader = new FileReader();//新建一个FileReader
-    //         reader.readAsBinaryString(objFiles.files[i]);//读取文件
-    //         // 读取文件内容放到 fileString 里面
-    //         reader.onload = function (evt) {
-    //             // var params = new Array();
-    //             var fileString = evt.target.result;
-    //             params[i] = fileString;
-    //             console.log(i);
-    //             // console.log("filesize: " + fileSize);
-    //             // console.log("par: " + params.length + fileString)
-    //
-    //             // if((params.length - 1) == fileSize ){
-    //             //     console.log(params);
-    //             // }
-    //
-    //             // console.log(params);
-    //         }
-    //     }
-    //     // console.log(params)
-    //     $.ajax({
-    //         type: 'get',
-    //         // contentType: "application/json",
-    //         url: 'http://172.16.15.66:8081/server_war_exploded/webapi/blockchain',
-    //         // data: JSON.stringify(params),
-    //         success: function (data) {
-    //             console.log('data: ' + data);
-    //         },
-    //         error: function (err) {
-    //             console.log('err: ');
-    //             console.log(JSON.stringify(err));
-    //         }
-    //     });
-    // });
 
     $("#maplist_btn").click(function () {
         $.ajax({
@@ -257,30 +237,5 @@ $(document).ready(function () {
 
 });
 
-
-// <!-- 字母 td 指表格数据（table data），即数据单元格的内容 -->
-// <!-- cellpadding 定义表格的宽度 -->
-// <!-- align 让表格居中显示 -->
-// <!-- <table border="1" cellpadding="10" align="center">
-//     <caption>历史版本查询</caption>
-//     <thead>
-//         <tr>
-//             <th>版本号</th>
-//             <th>修改时间</th>
-//             <th>查询链接</th>
-//         </tr>
-//     </thead>
-//     <tr>
-//         <td>
-//             Ver_1.0.0 
-//         </td>
-//         <td>
-//             2019.11.28
-//         </td>
-//         <td>
-//             查询
-//         </td>
-//     </tr>
-// </table> -->
 
 
