@@ -3,10 +3,12 @@ package com.supermap.atlab.blockchain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
-//import com.supermap.atlab.storage.Hdfs;
-import com.supermap.atlab.utils.Kml;
+import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Utils;
-import org.glassfish.jersey.media.multipart.*;
+import org.glassfish.jersey.media.multipart.BodyPart;
+import org.glassfish.jersey.media.multipart.BodyPartEntity;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,20 +17,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-
-//import com.supermap.atlab.storage.Hdfs;
 
 @Path("/blockchain")
 public class Blockchain {
 
     private ATLChain atlChain;
 
-    //    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
-    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
+//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -59,7 +58,7 @@ public class Blockchain {
             @FormDataParam("modelid") String modelid,
             FormDataMultiPart formDataMultiPart
     ) {
-//        Hdfs hdfs = new Hdfs();
+        Hdfs hdfs = new Hdfs();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
@@ -83,11 +82,12 @@ public class Blockchain {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                // hdfs存储
-//                hdfs.hdfsUploadFile(inputStream, extName, hash);
-                // 保存文件
+
                 InputStream in = bodyPartEntity.getInputStream();
-                Utils.saveFile(in, s3mDirPath + hash + extName);
+                // hdfs存储
+                hdfs.hdfsUploadFile(in, extName, hash);
+                // 保存文件
+//                Utils.saveFile(in, s3mDirPath + hash + extName);
             }
         });
         JSONArray jsonArray = new JSONArray();
