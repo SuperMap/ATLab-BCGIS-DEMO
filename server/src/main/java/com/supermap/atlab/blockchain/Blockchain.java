@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.storage.Hdfs;
-import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
@@ -16,25 +15,30 @@ import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Path("/blockchain")
 public class Blockchain {
 
     private ATLChain atlChain;
+    Hdfs hdfs;
+    Logger logger = Logger.getLogger(this.getClass().getName());
 
-    //        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
-    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
+//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
 
-    public Blockchain() {
+    public Blockchain() throws InterruptedException, IOException, URISyntaxException {
         atlChain = new ATLChain(networkConfigFile);
+        hdfs = new Hdfs();
     }
 
     @GET
@@ -49,6 +53,25 @@ public class Blockchain {
                 functionName,
                 new String[]{key}
         );
+
+        // 将文件从HDFS缓存到本地
+        JSONArray resultJsonArray = JSONArray.parseArray(result);
+        resultJsonArray.get(0);
+        for (Object o : resultJsonArray) {
+            JSONObject jsonObject = (JSONObject) o;
+            JSONObject recordJSON = (JSONObject) jsonObject.get("Record");
+            JSONArray shashList = (JSONArray) recordJSON.get("SHash");
+            for (Object hashObj : shashList) {
+                if (!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
+                    // TODO 当文件在HDFS中不存在时如何处理？？？
+                    String res = hdfs.hdfsDownloadFile(hashObj.toString(), s3mDirPath + hashObj.toString());
+                    if (!"Success".equals(res)) {
+                        logger.warning("Get file from HDFS failed!!!");
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
@@ -59,19 +82,16 @@ public class Blockchain {
             @FormDataParam("modelid") String modelid,
             FormDataMultiPart formDataMultiPart
     ) {
-        Hdfs hdfs = new Hdfs();
         JSONArray jsonArraySHash = new JSONArray();
         JSONArray jsonArrayS3m = new JSONArray();
         List<BodyPart> bodyParts = formDataMultiPart.getBodyParts();
         bodyParts.forEach(o -> {
             String mediaType = o.getMediaType().toString();
-            String extName = "";
             if (!mediaType.equals(MediaType.TEXT_PLAIN)) {
                 BodyPartEntity bodyPartEntity = (BodyPartEntity) o.getEntity();
                 String fileName = o.getContentDisposition().getFileName();
                 if (fileName.contains(".")) {
                     jsonArrayS3m.add(fileName.substring(0, fileName.lastIndexOf('.')));
-                    extName = Utils.getExtNameFromStr(fileName);
                 } else {
                     jsonArrayS3m.add(fileName);
                 }
@@ -86,17 +106,19 @@ public class Blockchain {
 
                 InputStream in = bodyPartEntity.getInputStream();
                 // hdfs存储
-                hdfs.hdfsUploadFile(in, extName, hash);
+                hdfs.hdfsUploadFile(in, hash);
                 // 保存本地文件
-//                Utils.saveFile(in, s3mDirPath + hash + extName);
+//                Utils.saveFile(in, s3mDirPath + hash);
             }
         });
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < jsonArrayS3m.size(); i++){
+            JSONArray shashJsonArray = new JSONArray();
+            shashJsonArray.add(jsonArraySHash.get(i));
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("MID", modelid);
             jsonObject.put("SID", jsonArrayS3m.get(i));
-            jsonObject.put("SHash", jsonArraySHash.get(i));
+            jsonObject.put("SHash", shashJsonArray);
             jsonArray.add(i, jsonObject);
         }
         // 保存单个模块
@@ -120,6 +142,26 @@ public class Blockchain {
                 functionName,
                 new String[]{key}
         );
+
+        // 将文件从HDFS缓存到本地
+        JSONArray resultJsonArray = JSONArray.parseArray(result);
+        resultJsonArray.get(0);
+        for (Object o : resultJsonArray) {
+            JSONObject jsonObject = (JSONObject) o;
+            JSONArray recordJSONArray = (JSONArray) jsonObject.get("Record");
+            jsonObject = (JSONObject) recordJSONArray.get(0);
+            recordJSONArray = (JSONArray) jsonObject.get("SHash");
+            for (Object hashObj : recordJSONArray) {
+                if (!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
+                    // TODO 当文件在HDFS中不存在时如何处理？？？
+                    String res = hdfs.hdfsDownloadFile(hashObj.toString(), s3mDirPath + hashObj.toString());
+                    if (!"Success".equals(res)) {
+                        logger.warning("Get file from HDFS failed!!!");
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
@@ -144,7 +186,7 @@ public class Blockchain {
                 new String[]{selector}
         );
 
-        // 获取s3m文件名
+        // 将文件从HDFS缓存到本地
         JSONArray resultJsonArray = JSONArray.parseArray(result);
         resultJsonArray.get(0);
         for (Object o : resultJsonArray) {
@@ -153,9 +195,10 @@ public class Blockchain {
             JSONArray shashList = (JSONArray) recordJSON.get("SHash");
             for (Object hashObj : shashList) {
                 if (!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
-                    System.out.println(hashObj + "不存在，需要下载");
-                    if (!getFileFromHdfs()) {
-                        return "{\"message\":\"" + hashObj + "不存在\"}";
+                    // TODO 当文件在HDFS中不存在时如何处理？？？
+                    String res = hdfs.hdfsDownloadFile(hashObj.toString(), s3mDirPath + hashObj.toString());
+                    if (!"Success".equals(res)) {
+                        logger.warning("Get file from HDFS failed!!!");
                     }
                 }
             }
@@ -177,10 +220,6 @@ public class Blockchain {
                 new String[]{key}
         );
         return result;
-    }
-
-    private boolean getFileFromHdfs() {
-        return false;
     }
 
     /**
@@ -219,7 +258,8 @@ public class Blockchain {
         for (Object object : jsonArrayS3m) {
             JSONObject jsonObject = (JSONObject) object;
             String SID = (String) jsonObject.get("SID");
-            String modifySHash = (String) jsonObject.get("SHash");
+            JSONArray tmp = (JSONArray) jsonObject.get("SHash");
+            String modifySHash = tmp.getString(0);
             String key = modelid + "-" + SID;
             String result = atlChain.query(
                     chaincodeName,
@@ -228,7 +268,8 @@ public class Blockchain {
             );
             if (result.length() != 0) {
                 JSONObject jsonResult = JSONObject.parseObject(result);
-                String oldSHash = (String) jsonResult.get("SHash");
+                tmp = (JSONArray) jsonObject.get("SHash");
+                String oldSHash = tmp.getString(0);
                 if (!modifySHash.equals(oldSHash)) {
                     String value = jsonObject.toString().replace(oldSHash, modifySHash);
                     String newResult = atlChain.invoke(

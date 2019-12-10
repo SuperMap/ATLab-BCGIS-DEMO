@@ -12,6 +12,10 @@ $(document).ready(function () {
 
     $("#btn_show_s3m_moudle").click(function creatTab() {
         let modelid = $("#modelid").val();
+        if (modelid == "") {
+            alert("模型ID不能为空！！！");
+            return;
+        }
         let s3mid = $("#sid").val();
         var tab = '<table border=1 width="500" cellpadding="10" align="center">'
         tab += "<caption>历史版本查询</caption>";
@@ -110,13 +114,8 @@ $(document).ready(function () {
                     var points = [116.395074412521, 40.0167102653286, 5.4119813283905];//116.395074412521, 40.0167102653286, 5.4119813283905
 
                     var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
-                    // var temp = s3mFilePath.substring(3,s s3mFilePath.length - 3);
-                    // var ss = temp.split(",");
-                    console.log(typeof s3mFilePath);
-                    // consolel.log(typeof s3mFilePath === 'String');
-                    // console.log(s3mFilePath instanceof 'string');
                     if (typeof s3mFilePath == 'string') {
-                        var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath + '.s3m'
+                        var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath
                         var keymap = {};
                         keymap[exam] = [];
                         var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
@@ -138,7 +137,7 @@ $(document).ready(function () {
                         // 循环输出图层
                         for (var i = 0; i < s3mFilePath.length; i++) {
                             // var temp1 = ss[i];
-                            var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i] + '.s3m'
+                            var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i]
                             var keymap = {};
                             keymap[exam] = [];
                             var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
@@ -200,58 +199,12 @@ $(document).ready(function () {
             contentType: false,
             success: function (data) {
                 alert(data);
-                // console.log(data);
-                // console.log('data: ' + JSON.stringify(data));
             },
             error: function (e) {
-                // alert("错误！！");
+                alert("错误！！" + e);
             }
         });
     });
-
-    $("#maplist_btn").click(function () {
-        $.ajax({
-            type: 'get',
-            url: 'http://172.16.15.66:8899/bcgis/mapservice/wms/list',
-            data: {
-                workspaceName: document.getElementById("maplist_workspace").value,
-                datastoreName: document.getElementById("maplist_datastore").value,
-            },
-            success: function (data) {
-                console.log('data: ');
-                console.log(data);
-                document.getElementById("maps").innerHTML = JSON.stringify(data);
-            },
-            error: function (err) {
-                console.log('err: ');
-                console.log(err);
-            }
-        });
-    });
-
-    // 出现 ajax 请求，将获取的路径返回给后端，让后端完成数据的存储过程，最后返回一个值表明数据存储完毕即可
-    // $("#btn_saveFile").click(function () {
-
-    //     // var params = document.getElementById("input_getFilePath").value;
-
-    //     // $.ajax({
-    //     //     type: 'post',
-    //     //     contentType: "application/json",
-    //     //     url: 'http://localhost:8899/bcgis/mapservice/wms/publish',
-    //     //     data: JSON.stringify(params),
-    //     //     success: function (data) {
-    //     //         console.log('data: ' + JSON.stringify(data));
-    //     //     },
-    //     //     error: function (err) {
-    //     //         console.log('err: ');
-    //     //         console.log(JSON.stringify(err));
-    //     //     }
-    //     // });
-
-    //     alert("文件保存完毕，请点击返回")
-
-    // });
-
 });
 
 
