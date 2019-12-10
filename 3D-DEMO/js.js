@@ -79,18 +79,35 @@ $(document).ready(function () {
                 var viewer = new Cesium.Viewer('cesiumContainer');
                 var scene = viewer.scene;
                 var widget = viewer.cesiumWidget;
+                viewer.scene.globe.enableLighting = true;
                 try {
                     //打开所发布三维服务下的所有图层
-                    scene.camera.setView({
-                        destination: new Cesium.Cartesian3(-2172108.996759282, 4375350.277824589, 4101673.0066891187),
-                        orientation: {
-                            heading: 4.354565476048545,
-                            pitch: -0.35245897259115955,
-                            roll: 9.353513519272383e-10
+                    // scene.camera.setView({
+                    //     // estination: new Cesium.Cartesian3(-2172108.996759282, 4375350.277824589, 4101673.0066891187),
+                    //     destination: new Cesium.Cartesian3(-2172200, 4375350, 4101600),
+                    //     orientation: {
+                    //         heading: 4.354565476048545,
+                    //         pitch: -0.35245897259115955,
+                    //         roll: 9.353513519272383e-10
+                    //     }
+                    // });
+
+                    // Create an initial camera view
+                    var initialPosition = new Cesium.Cartesian3.fromDegrees(116.39473, 40.0163, 53.411); //116.39473, 40.0163, 53.411
+                    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(5, -36, 0.0);//5, -36, 0.0
+                    var homeCameraView = {
+                        destination : initialPosition,
+                        orientation : {
+                            heading : initialOrientation.heading,
+                            pitch : initialOrientation.pitch,
+                            roll : initialOrientation.roll
                         }
-                    });
+                    };
+                    // Set the initial view
+                    viewer.scene.camera.setView(homeCameraView);
+
                     // 定义数据展示的位置
-                    var points = [116.395074412521, 40.0167102653286, 39.4119813283905];
+                    var points = [116.395074412521, 40.0167102653286, 5.4119813283905];//116.395074412521, 40.0167102653286, 5.4119813283905
 
                     var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
                     // var temp = s3mFilePath.substring(3,s s3mFilePath.length - 3);
