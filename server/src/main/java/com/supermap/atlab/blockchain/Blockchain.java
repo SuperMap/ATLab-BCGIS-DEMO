@@ -87,7 +87,7 @@ public class Blockchain {
                 InputStream in = bodyPartEntity.getInputStream();
                 // hdfs存储
                 hdfs.hdfsUploadFile(in, extName, hash);
-                // 保存文件
+                // 保存本地文件
 //                Utils.saveFile(in, s3mDirPath + hash + extName);
             }
         });
