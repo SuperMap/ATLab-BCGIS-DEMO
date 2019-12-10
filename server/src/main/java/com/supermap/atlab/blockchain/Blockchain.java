@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.storage.Hdfs;
+import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
@@ -24,10 +25,10 @@ public class Blockchain {
 
     private ATLChain atlChain;
 
-        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
-//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+    //        final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
+    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -100,7 +101,7 @@ public class Blockchain {
         }
         // 保存单个模块
         JSONArray jsonToAll = saveSingleS3m(modelid, jsonArray);
-        System.out.println(jsonToAll);
+//        System.out.println(jsonToAll);
         //保存完整模块
         saveALLS3mMoudle(modelid, jsonToAll);
         return "save file success";
@@ -188,14 +189,12 @@ public class Blockchain {
      * @param modelid
      */
     public void storageS3mFile(String modelid) {
-
         // TODO 单个与整体的存储测试
 //        JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
-////        System.out.println(jsonArrayS3m);
+//        System.out.println(jsonArrayS3m);
 //        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
 //        System.out.println(jsonToAll);
 //        saveALLS3mMoudle(modelid, jsonToAll);
-
         // TODO 单个与整体的删除测试
 //        File file = new File("E:\\SuperMapData\\test\\saveTest");
 //        String[] fileName = file.list();
@@ -258,6 +257,7 @@ public class Blockchain {
         }
         JSONObject jsonToAll = new JSONObject();
         jsonToAll.put("SHash", jsonArray);
+//        System.out.println(jsonArray);
         return jsonArray;
     }
 
@@ -280,6 +280,7 @@ public class Blockchain {
             String hash = jsonResult.get("SHash").toString();
             jsonArray = JSONArray.parseArray(hash);
         }
+        JSONArray newJsonArray = (JSONArray) jsonArray.clone();
         for (Object json : jsonArrayS3m) {
             JSONObject temp = (JSONObject) JSONObject.parse(json.toString());
             String oldHash = temp.get("old").toString();
@@ -287,24 +288,26 @@ public class Blockchain {
             // 该信息不为空 即代表之前存储过信息 ----> 分为修改和添加
             if (result.length() != 0) {
                 if (oldHash.equals("empty")) {
-                    jsonArray.add(modifyHash);
+                    newJsonArray.add(modifyHash);
                 } else {
-                    jsonArray.remove(oldHash);
-                    jsonArray.add(modifyHash);
+                    newJsonArray.remove(oldHash);
+                    newJsonArray.add(modifyHash);
                 }
             } else {
-                jsonArray.add(modifyHash);
+                newJsonArray.add(modifyHash);
             }
         }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("SHash", jsonArray);
-        String newValue = jsonObject.toString();
-        System.out.println("newValue" + newValue);
-        String s = atlChain.invoke(
-                chaincodeName,
-                putRecord,
-                new String[]{modelid, newValue}
-        );
+        if( !jsonArray.equals(newJsonArray) || result.length() == 0){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("SHash", newJsonArray);
+            String newValue = jsonObject.toString();
+//            System.out.println("newValue" + newValue);
+            atlChain.invoke(
+                    chaincodeName,
+                    putRecord,
+                    new String[]{modelid, newValue}
+            );
+        }
     }
 
     /**
