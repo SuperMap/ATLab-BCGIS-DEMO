@@ -12,10 +12,6 @@ $(document).ready(function () {
 
     $("#btn_show_s3m_moudle").click(function creatTab() {
         let modelid = $("#modelid").val();
-        if (modelid == "") {
-            alert("模型ID不能为空！！！");
-            return;
-        }
         let s3mid = $("#sid").val();
         var tab = '<table border=1 width="500" cellpadding="10" align="center">'
         tab += "<caption>历史版本查询</caption>";
@@ -95,7 +91,6 @@ $(document).ready(function () {
                     //         roll: 9.353513519272383e-10
                     //     }
                     // });
-
                     // Create an initial camera view
                     var initialPosition = new Cesium.Cartesian3.fromDegrees(116.39473, 40.0163, 53.411); //116.39473, 40.0163, 53.411
                     var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(5, -36, 0.0);//5, -36, 0.0
@@ -112,10 +107,10 @@ $(document).ready(function () {
 
                     // 定义数据展示的位置
                     var points = [116.395074412521, 40.0167102653286, 5.4119813283905];//116.395074412521, 40.0167102653286, 5.4119813283905
-
                     var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
-                    if (typeof s3mFilePath == 'string') {
-                        var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath
+                    for (var i = 0; i < s3mFilePath.length; i++) {
+                        // var temp1 = ss[i];
+                        var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i]
                         var keymap = {};
                         keymap[exam] = [];
                         var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
@@ -123,7 +118,7 @@ $(document).ready(function () {
                         layer.enableLocalOffset = false;//禁止模型局部偏移
                         scene.primitives.add(layer);
                         var pillarState = new Cesium.DynamicObjectState({
-                            id: 0,
+                            id: i,
                             longitude: points[0],
                             latitude: points[1],
                             altitude: points[2],
@@ -132,29 +127,6 @@ $(document).ready(function () {
                         keymap[exam].push(pillarState);
                         for (var key in keymap) {
                             layer.updateObjectWithModel(key, keymap[key]);
-                        }
-                    } else {
-                        // 循环输出图层
-                        for (var i = 0; i < s3mFilePath.length; i++) {
-                            // var temp1 = ss[i];
-                            var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i]
-                            var keymap = {};
-                            keymap[exam] = [];
-                            var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
-                            layer.updateInterval = 500;//动态图层更新时间
-                            layer.enableLocalOffset = false;//禁止模型局部偏移
-                            scene.primitives.add(layer);
-                            var pillarState = new Cesium.DynamicObjectState({
-                                id: i,
-                                longitude: points[0],
-                                latitude: points[1],
-                                altitude: points[2],
-                                scale: new Cesium.Cartesian3(1, 1, 1)
-                            });
-                            keymap[exam].push(pillarState);
-                            for (var key in keymap) {
-                                layer.updateObjectWithModel(key, keymap[key]);
-                            }
                         }
                     }
                 } catch (e) {
@@ -199,13 +171,12 @@ $(document).ready(function () {
             contentType: false,
             success: function (data) {
                 alert(data);
+                // console.log(data);
+                // console.log('data: ' + JSON.stringify(data));
             },
             error: function (e) {
-                alert("错误！！" + e);
+                // alert("错误！！");
             }
         });
     });
 });
-
-
-
