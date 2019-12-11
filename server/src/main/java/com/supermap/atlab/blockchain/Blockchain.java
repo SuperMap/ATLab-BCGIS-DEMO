@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.storage.Hdfs;
+import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
@@ -28,10 +29,10 @@ public class Blockchain {
     Hdfs hdfs;
     Logger logger = Logger.getLogger(this.getClass().getName());
 
-    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
-    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
-//    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
-//    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
+    //    final private File networkConfigFile = new File("/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/src/main/resources/network-config-test.yaml");
+//    final private String s3mDirPath = "/home/cy/Documents/ATL/SuperMap/ATLab-examples/server/target/server/s3m/";
+    final private String s3mDirPath = "E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\target\\server\\s3m\\";
+    final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
     final private String chaincodeName = "bimcc";
@@ -80,6 +81,7 @@ public class Blockchain {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String PutRecord(
             @FormDataParam("modelid") String modelid,
+            @FormDataParam("selectStorageMethod") String selectStorageMethod,
             FormDataMultiPart formDataMultiPart
     ) {
         JSONArray jsonArraySHash = new JSONArray();
@@ -123,9 +125,12 @@ public class Blockchain {
         }
         // 保存单个模块
         JSONArray jsonToAll = saveSingleS3m(modelid, jsonArray);
-//        System.out.println(jsonToAll);
         //保存完整模块
-        saveALLS3mMoudle(modelid, jsonToAll);
+        if( selectStorageMethod.equals("appendAndModifyModel") ){
+            appendAndModifyModel(modelid, jsonToAll);
+        } else if( selectStorageMethod.equals("redefineModel")) {
+            redefineModel(modelid, jsonArray);
+        }
         return "save file success";
     }
 
@@ -223,8 +228,7 @@ public class Blockchain {
     }
 
     /**
-     * 测试 saveSingleS3m && saveALLS3mMoudle
-     *
+     * 内部测试 saveSingleS3m && saveALLS3mMoudle && redefineModel
      * @param modelid
      */
     public void storageS3mFile(String modelid) {
@@ -234,6 +238,8 @@ public class Blockchain {
 //        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
 //        System.out.println(jsonToAll);
 //        saveALLS3mMoudle(modelid, jsonToAll);
+//        redefineModel(modelid, jsonArrayS3m);
+
         // TODO 单个与整体的删除测试
 //        File file = new File("E:\\SuperMapData\\test\\saveTest");
 //        String[] fileName = file.list();
@@ -268,7 +274,7 @@ public class Blockchain {
             );
             if (result.length() != 0) {
                 JSONObject jsonResult = JSONObject.parseObject(result);
-                tmp = (JSONArray) jsonObject.get("SHash");
+                tmp = (JSONArray) jsonResult.get("SHash");
                 String oldSHash = tmp.getString(0);
                 if (!modifySHash.equals(oldSHash)) {
                     String value = jsonObject.toString().replace(oldSHash, modifySHash);
@@ -303,11 +309,11 @@ public class Blockchain {
     }
 
     /**
-     * 模型整体信息存储
+     * 修改与追加整体模型信息
      * @param modelid
      * @param jsonArrayS3m
      */
-    private void saveALLS3mMoudle(String modelid, JSONArray jsonArrayS3m) {
+    private void appendAndModifyModel(String modelid, JSONArray jsonArrayS3m) {
         String getRecord = "GetRecord";
         String putRecord = "PutRecord";
         String result = atlChain.query(
@@ -349,6 +355,30 @@ public class Blockchain {
                     new String[]{modelid, newValue}
             );
         }
+    }
+
+    /**
+     * 重新定义整个模型
+     */
+    private void redefineModel(String modelid, JSONArray jsonArrayS3m){
+        String putRecord = "PutRecord";
+        JSONArray jsonArray = new JSONArray();
+        for (Object object : jsonArrayS3m) {
+            JSONObject jsonObject = (JSONObject) object;
+            JSONArray tmp = (JSONArray) jsonObject.get("SHash");
+            String SHash = tmp.getString(0);
+            jsonArray.add(SHash);
+        }
+        System.out.println(jsonArray);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("SHash", jsonArray);
+        String newValue = jsonObject.toString();
+//        System.out.println("newValue" + newValue);
+        atlChain.invoke(
+                chaincodeName,
+                putRecord,
+                new String[]{modelid, newValue}
+        );
     }
 
     /**
