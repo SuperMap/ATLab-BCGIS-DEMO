@@ -369,7 +369,7 @@ public class Blockchain {
             String SHash = tmp.getString(0);
             jsonArray.add(SHash);
         }
-        System.out.println(jsonArray);
+//        System.out.println(jsonArray);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("SHash", jsonArray);
         String newValue = jsonObject.toString();
@@ -434,8 +434,8 @@ public class Blockchain {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("SHash", jsonArray.toString());
         String newValue = jsonObject.toString();
-        System.out.println(newValue);
-        System.out.println(jsonArray.size());
+//        System.out.println(newValue);
+//        System.out.println(jsonArray.size());
 //        atlChain.query(
 //                chaincodeName,
 //                putRecord,
