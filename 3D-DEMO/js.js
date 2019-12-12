@@ -92,8 +92,8 @@ $(document).ready(function () {
                     //     }
                     // });
                     // Create an initial camera view
-                    var initialPosition = new Cesium.Cartesian3.fromDegrees(116.39473, 40.0163, 53.411); //116.39473, 40.0163, 53.411
-                    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(5, -36, 0.0);//5, -36, 0.0
+                    var initialPosition = new Cesium.Cartesian3.fromDegrees(116.3950 , 40.0172, 53.411); //116.3950 , 40.0172, 53.411
+                    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(-155, -36, 0.0);//155, -36, 0.0 第一个参数负责模型转向
                     var homeCameraView = {
                         destination : initialPosition,
                         orientation : {
