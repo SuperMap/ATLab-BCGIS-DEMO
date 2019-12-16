@@ -12,3 +12,4 @@ server/src/main/resources/network-config-test.yaml
 .idea/
 
 
+server/src/test/java/com/supermap/atlab/blockchain/tempTest.java

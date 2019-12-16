@@ -1,9 +1,7 @@
 // enroll
 
-// var RESTURL = "http://127.0.0.1:8002";
-// var FileURL = "http://127.0.0.1:8001";
-var RESTURL = "http://175.154.161.50:7002";
-var FileURL = "http://175.154.161.50:7001";
+var RESTURL = "http://127.0.0.1:7002";
+var FileURL = "http://127.0.0.1:7001";
 
 $(document).ready(function () {
     // 设置预设值
