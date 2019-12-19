@@ -291,6 +291,7 @@ $(document).ready(function () {
                     case "estate":
                         if ($("#ParentID_op1_put_input").val() != "") {
                             parentRecordID = $("#ParentID_op1_put_input").val();
+                            console.log("===========parentRecordID>" + parentRecordID);
                         }
                         var objFiles_Image = document.getElementById("Image_op1_put_input");
                         var reader_Image = new FileReader();
@@ -392,6 +393,7 @@ $(document).ready(function () {
                 console.log("click commit button!");
 
                 var parentRecordID = $("#reg_parentID")[0].innerHTML;
+
                 var txType = $("#type_op1_reg_input").val();
                 var txAmount = $("#amount_op1_reg_input").val();
                 var txCZZT = $("#txCZZT")[0].innerHTML;
@@ -503,7 +505,7 @@ $(document).ready(function () {
 
                 var jsonData = JSON.parse(data);
                 var pID = jsonData[0]["Record"]["parentRecordID"];
-                if (pID != "" && pID.length == 64) {
+                if (pID != "") {
                     $("#result_input").html(FormatOutputUsualWithUrl(data, txid));
                 } else {
                     $("#result_input").html(FormatOutputUsual(data, txid));
@@ -516,8 +518,12 @@ $(document).ready(function () {
     }
 
     $('body').on('click', '#traceParentTxID', function () {
-        console.log("tracing parent tx id...");
-        getTractionStepByStep($("#traceParentTxIDContent").html().trim(), "");
+        $(document).click(function (e) { // 在页面任意位置点击而触发此事件
+            var v_id = $(e.target).attr('id');
+            getTractionStepByStep($("#" + v_id).html().trim());
+        })
+        // console.log("tracing parent tx id...");
+        // getTractionStepByStep($("#traceParentTxIDContent").html().trim(), "");
     });
 
     $("#trace_btn").click(function () {
@@ -1049,7 +1055,11 @@ function FormatOutputUsualWithUrl(data, txid) {
                 if (!jsonData[i][key].hasOwnProperty("parentRecordID")) {
                     str += "<p><label><b>父交易ID:</b></label>" + jsonData[i][key]["parentTxID"] + "</p>";
                 } else {
-                    str += "<p id=\"traceParentTxID\"><label><b>父交易ID:</b></label><label id=\"traceParentTxIDContent\" style=\"color:blue\">" + jsonData[i][key]["parentRecordID"] + "</label></p>";
+                    var pids = jsonData[i][key]["parentRecordID"];
+                    var pidArray = pids.split(',');
+                    for (ii = 0; ii < pidArray.length; ii++) {
+                        str += "<p id=\"traceParentTxID\"><label><b>父交易ID-" + ii + ":</b></label><label class=\"traceParentTxIDContent\" id=\"traceParentTxIDContent" + ii + "\" style=\"color:blue\">" + pidArray[ii] + "</label></p>";
+                    }
                 }
                 for (var key2 in jsonData[i][key]) {
                     switch (key2) {

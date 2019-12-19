@@ -378,7 +378,10 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName/AddRecord', async fun
 		return;
 	}
 
-	var jsonArgs = JSON.parse(args[1]);
+	var tmp_args = args[1];
+	tmp_args = tmp_args.replace(/[\n\r]/g,',');
+	console.log("=======>" + tmp_args);
+	var jsonArgs = JSON.parse(tmp_args);
 
 	var signature = jsonArgs.signature;
 	var storageType = jsonArgs.storageType;
