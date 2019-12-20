@@ -1,7 +1,7 @@
 // enroll
 
-var RESTURL = "http://127.0.0.1:7002";
-var FileURL = "http://127.0.0.1:7001";
+var RESTURL = "http://localhost:7002";
+var FileURL = "http://localhost:7001";
 
 $(document).ready(function () {
     // 设置预设值
@@ -517,17 +517,21 @@ $(document).ready(function () {
         });
     }
 
-    $('body').on('click', '#traceParentTxID', function () {
-        $(document).click(function (e) { // 在页面任意位置点击而触发此事件
+    // 加载页面时绑定事件，防止ajax更新元素无法触发事件
+    $('body').on('click', '.traceParentTxIDContent', function (e) {
             var v_id = $(e.target).attr('id');
-            getTractionStepByStep($("#" + v_id).html().trim());
-        })
+            var v_id_content = $("#" + v_id).html().trim();
+            if (v_id_content.length == 64) {
+                getTractionStepByStep(v_id_content);
+            } else {
+                alert("非法的父交易ID");
+            }
         // console.log("tracing parent tx id...");
         // getTractionStepByStep($("#traceParentTxIDContent").html().trim(), "");
     });
 
     $("#trace_btn").click(function () {
-        pTxID = $("#recordID_trace_input").val()
+        pTxID = $("#recordID_trace_input").val();
         getTractionStepByStep(pTxID, "");
     });
     // trace <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
