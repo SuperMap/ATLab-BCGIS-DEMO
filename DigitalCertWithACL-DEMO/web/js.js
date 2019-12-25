@@ -1,7 +1,7 @@
 // enroll
 
-var RESTURL = "http://127.0.0.1:7002";
-var FileURL = "http://127.0.0.1:7001";
+var RESTURL = "http://localhost:7002";
+var FileURL = "http://localhost:7001";
 
 $(document).ready(function () {
     // 设置预设值
@@ -291,6 +291,7 @@ $(document).ready(function () {
                     case "estate":
                         if ($("#ParentID_op1_put_input").val() != "") {
                             parentRecordID = $("#ParentID_op1_put_input").val();
+                            console.log("===========parentRecordID>" + parentRecordID);
                         }
                         var objFiles_Image = document.getElementById("Image_op1_put_input");
                         var reader_Image = new FileReader();
@@ -392,6 +393,7 @@ $(document).ready(function () {
                 console.log("click commit button!");
 
                 var parentRecordID = $("#reg_parentID")[0].innerHTML;
+
                 var txType = $("#type_op1_reg_input").val();
                 var txAmount = $("#amount_op1_reg_input").val();
                 var txCZZT = $("#txCZZT")[0].innerHTML;
@@ -503,7 +505,7 @@ $(document).ready(function () {
 
                 var jsonData = JSON.parse(data);
                 var pID = jsonData[0]["Record"]["parentRecordID"];
-                if (pID != "" && pID.length == 64) {
+                if (pID != "") {
                     $("#result_input").html(FormatOutputUsualWithUrl(data, txid));
                 } else {
                     $("#result_input").html(FormatOutputUsual(data, txid));
@@ -515,13 +517,21 @@ $(document).ready(function () {
         });
     }
 
-    $('body').on('click', '#traceParentTxID', function () {
-        console.log("tracing parent tx id...");
-        getTractionStepByStep($("#traceParentTxIDContent").html().trim(), "");
+    // 加载页面时绑定事件，防止ajax更新元素无法触发事件
+    $('body').on('click', '.traceParentTxIDContent', function (e) {
+            var v_id = $(e.target).attr('id');
+            var v_id_content = $("#" + v_id).html().trim();
+            if (v_id_content.length == 64) {
+                getTractionStepByStep(v_id_content);
+            } else {
+                alert("非法的父交易ID");
+            }
+        // console.log("tracing parent tx id...");
+        // getTractionStepByStep($("#traceParentTxIDContent").html().trim(), "");
     });
 
     $("#trace_btn").click(function () {
-        pTxID = $("#recordID_trace_input").val()
+        pTxID = $("#recordID_trace_input").val();
         getTractionStepByStep(pTxID, "");
     });
     // trace <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1049,7 +1059,11 @@ function FormatOutputUsualWithUrl(data, txid) {
                 if (!jsonData[i][key].hasOwnProperty("parentRecordID")) {
                     str += "<p><label><b>父交易ID:</b></label>" + jsonData[i][key]["parentTxID"] + "</p>";
                 } else {
-                    str += "<p id=\"traceParentTxID\"><label><b>父交易ID:</b></label><label id=\"traceParentTxIDContent\" style=\"color:blue\">" + jsonData[i][key]["parentRecordID"] + "</label></p>";
+                    var pids = jsonData[i][key]["parentRecordID"];
+                    var pidArray = pids.split(',');
+                    for (ii = 0; ii < pidArray.length; ii++) {
+                        str += "<p id=\"traceParentTxID\"><label><b>父交易ID-" + ii + ":</b></label><label class=\"traceParentTxIDContent\" id=\"traceParentTxIDContent" + ii + "\" style=\"color:blue\">" + pidArray[ii] + "</label></p>";
+                    }
                 }
                 for (var key2 in jsonData[i][key]) {
                     switch (key2) {
