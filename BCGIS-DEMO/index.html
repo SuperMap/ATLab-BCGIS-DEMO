@@ -11,6 +11,12 @@
 
 <body>
     <div id="header"></div>
+    <!-- 设置单击事件，显示属性 -->
+    <div id="map" class="map"></div>
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
+    </div>
     <div id="option">
         <form id="publish_form">
             <fieldset>
@@ -21,7 +27,6 @@
                         <option value="union">联合分析</option>
                         <option value="intersection">叠加分析</option>
                         <option value="attributes">属性查询</option>
-                        <option value="spatial">空间查询-依靠输入</option>
                         <option value="query">空间查询</option>
                     </select>
                 </p>
@@ -37,25 +42,16 @@
                 </p>
                 <p id="attributesParams" hidden="hidden">
                     <label for="attributes_type_label">输入属性: </label>
-                    <input type="select" id="attributes_analysis_input" value="shuangliuqu" ></input>
+                    <input type="select" id="attributes_analysis_input" value="shuangliuqu"></input>
                     <button type="button" id="analysis_btn_attributes">查询</button>
-                </p>
-                <p id="spatialParams" hidden="hidden">
-                    <label for="attributes_type_label">输入范围: </label>
-                    <!-- 是依次输入然后查询比较好一点，后面再美化 -->
-                    <input type="select" id="spatial_analysis_minX" value="116" ></input>
-                    <input type="select" id="spatial_analysis_minY" value="40" ></input>
-                    <input type="select" id="spatial_analysis_maxX" value="116.2" ></input>
-                    <input type="select" id="spatial_analysis_maxY" value="40.5" ></input>
-                    <button type="button" id="analysis_btn_spatial">查询</button>
                 </p>
                 <p>
                     <button type="button" id="query_btn_intersect" hidden="hidden">查询</button>
                 </p>
-                <p id="minX" hidden = "hidden"></p>
-                <p id="minY" hidden = "hidden"></p>
-                <p id="maxX" hidden = "hidden"></p>
-                <p id="maxY" hidden = "hidden"></p>
+                <p id="minX" hidden="hidden"></p>
+                <p id="minY" hidden="hidden"></p>
+                <p id="maxX" hidden="hidden"></p>
+                <p id="maxY" hidden="hidden"></p>
             </fieldset>
         </form>
     </div>

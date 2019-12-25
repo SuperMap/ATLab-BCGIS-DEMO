@@ -1,3 +1,9 @@
+/*
+ * @Author: mikey.zhaopeng 
+ * @Date: 2019-12-25 16:28:52 
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2019-12-25 17:12:05
+ */
 import 'ol/ol.css';
 import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
@@ -5,11 +11,43 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import { Fill, Stroke, Style, Text } from 'ol/style';
+import Overlay from 'ol/Overlay';
+import { toStringHDMS } from 'ol/coordinate';
+import { toLonLat } from 'ol/proj';
 
 import { platformModifierKeyOnly } from 'ol/events/condition';
 import { DragBox, Select } from 'ol/interaction';
-// import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-// import {OSM, Vector as VectorSource} from 'ol/source';
+
+
+/**
+* Elements that make up the popup.
+*/
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+
+
+/**
+ * Create an overlay to anchor the popup to the map.
+ */
+var overlay = new Overlay({
+    element: container,
+    autoPan: true,
+    autoPanAnimation: {
+        duration: 250
+    }
+});
+
+
+/**
+ * Add a click handler to hide the popup.
+ * @return {boolean} Don't follow the href.
+ */
+closer.onclick = function () {
+    overlay.setPosition(undefined);
+    closer.blur();
+    return false;
+};
 
 
 // 成都市区 http://localhost:8080/geoserver/Test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Test%3A5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301&maxFeatures=50&outputFormat=text%2Fjavascript
@@ -25,7 +63,7 @@ var wfsParams = {
 };
 
 const map = new Map({
-
+    overlays: [overlay],
     target: 'map-container',
     view: new View({
         // projection:"EPSG:4326",  // 该设置不适用于经纬度地图
@@ -33,6 +71,8 @@ const map = new Map({
         zoom: 25   // 25 8
     })
 });
+map.addOverlay(overlay);
+
 
 // 获得地图
 var vectorSource = new VectorSource({
@@ -61,18 +101,25 @@ var vectorLayer = new VectorLayer({
 });
 map.addLayer(vectorLayer);
 
+// 设置图层颜色
 var highlightStyle = new Style({
+
+    // 设置边框颜色
     stroke: new Stroke({
-        color: '#f0f',
+        color: '#f00',
         width: 1
     }),
+
+    // 设置填充颜色
     fill: new Fill({
-        color: 'rgba(255，0，255, 0.1)'
+        color: '#f00',
     }),
+
+    // 设置里面字体的颜色
     text: new Text({
         font: '12px Calibri,sans-serif',
         fill: new Fill({
-            color: '#f0f'
+            color: '#ff0'
         }),
         stroke: new Stroke({
             color: '#f0f',
@@ -81,29 +128,56 @@ var highlightStyle = new Style({
     })
 });
 
-// 这个时定义高亮显示的  把 下面注释掉之后，在选中的时候就不会出现高亮显示额
+// 高亮显示单个属性（不在使用）
 var featureOverlay = new VectorLayer({
     source: new VectorSource(),
     map: map,
     style: function (feature) {
-        highlightStyle.getText().setText(feature.get('name'));
+        // highlightStyle.getText().setText(feature.get('AdminCode'));   // 属性在feature里面，首先需要拿出来，然后实现
         return highlightStyle;
+    }
+});
+
+
+/**
+* Add a click handler to the map to render the popup.
+*/
+// 实现单击图层获得属性
+map.on('singleclick', function (evt) {
+
+    var coordinate = evt.coordinate;
+    var pixel = map.getEventPixel(evt.originalEvent);
+    var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+        return feature;
+    });
+    if (feature) {
+        // 得到属性的键
+        var keys = feature.getKeys();
+        // 得到属性值
+        var json = {};
+        for (var i = 1; i < keys.length; i++) {
+            var key = keys[i];
+            var value = feature.get(key);
+            json[key] = value;
+        }
+        content.innerHTML = JSON.stringify(json);
+        console.log(json);
+        overlay.setPosition(coordinate);
+
     }
 });
 
 var highlight;
 var displayFeatureInfo = function (pixel) {
+    // 得到feature，里面的value为属性
     var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
         return feature;
     });
 
     var info = document.getElementById('info');
     if (feature) {
-        info.innerHTML = feature.getId() + ': ' + feature.get('name');
-        console.log(feature);
-    } else {
-        // info.innerHTML = '&nbsp';
-    }
+        info.innerHTML = "ID : " + feature.getId();
+    } 
 
     if (feature !== highlight) {
         if (highlight) {
@@ -142,7 +216,7 @@ var sendSelectedFeatureInfo = function (evt) {
 };
 
 var selectedList = [];
-map.on('click', function (evt) {
+map.on('dblclick', function (evt) {
     switch ($("#analysis_type_select").val()) {
         case "buffer":
             sendFeatureInfo(evt);
