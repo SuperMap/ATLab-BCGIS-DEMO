@@ -2,7 +2,7 @@
  * @Author: mikey.zhaopeng 
  * @Date: 2019-12-25 16:28:52 
  * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2019-12-25 17:12:05
+ * @Last Modified time: 2020-01-10 10:31:13
  */
 import 'ol/ol.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -12,9 +12,6 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import { Fill, Stroke, Style, Text } from 'ol/style';
 import Overlay from 'ol/Overlay';
-import { toStringHDMS } from 'ol/coordinate';
-import { toLonLat } from 'ol/proj';
-
 import { platformModifierKeyOnly } from 'ol/events/condition';
 import { DragBox, Select } from 'ol/interaction';
 
@@ -26,7 +23,6 @@ var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
 
-
 /**
  * Create an overlay to anchor the popup to the map.
  */
@@ -37,7 +33,6 @@ var overlay = new Overlay({
         duration: 250
     }
 });
-
 
 /**
  * Add a click handler to hide the popup.
@@ -62,6 +57,10 @@ var wfsParams = {
     format_options: "callback:loadFeatures"  //回调函数声明  
 };
 
+/**
+ * 构建地图
+ * TODO 1、如何自动设置地图的中心点和地图的坐标系
+ */
 const map = new Map({
     overlays: [overlay],
     target: 'map-container',
@@ -73,8 +72,9 @@ const map = new Map({
 });
 map.addOverlay(overlay);
 
-
-// 获得地图
+/**
+ * 获得地图 vectorSource
+ */
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
     // url: "./data/beijing.json",
@@ -91,6 +91,11 @@ var vectorSource = new VectorSource({
     },
     projection: "EPSG:4326"
 });
+
+/**
+ * 获得地图 VS =====>>>>用于当有返回的feature时高亮显示地图
+ */
+var VS = new VectorSource({});
 
 window.loadFeatures = function (response) {
     vectorSource.addFeatures((new GeoJSON()).readFeatures(response));  //载入要素
@@ -112,7 +117,7 @@ var highlightStyle = new Style({
 
     // 设置填充颜色
     fill: new Fill({
-        color: '#f00',
+        color: '#ff0',
     }),
 
     // 设置里面字体的颜色
@@ -128,7 +133,9 @@ var highlightStyle = new Style({
     })
 });
 
-// 高亮显示单个属性（不在使用）
+/**
+ * 高亮显示单个属性
+ */
 var featureOverlay = new VectorLayer({
     source: new VectorSource(),
     map: map,
@@ -138,12 +145,10 @@ var featureOverlay = new VectorLayer({
     }
 });
 
-
 /**
-* Add a click handler to the map to render the popup.
-*/
-// 实现单击图层获得属性
-map.on('singleclick', function (evt) {
+ * 实现双击图层获得属性 dblclick singleclick
+ */
+map.on('dblclick', function (evt) {
 
     var coordinate = evt.coordinate;
     var pixel = map.getEventPixel(evt.originalEvent);
@@ -163,7 +168,6 @@ map.on('singleclick', function (evt) {
         content.innerHTML = JSON.stringify(json);
         console.log(json);
         overlay.setPosition(coordinate);
-
     }
 });
 
@@ -177,7 +181,7 @@ var displayFeatureInfo = function (pixel) {
     var info = document.getElementById('info');
     if (feature) {
         info.innerHTML = "ID : " + feature.getId();
-    } 
+    }
 
     if (feature !== highlight) {
         if (highlight) {
@@ -190,6 +194,9 @@ var displayFeatureInfo = function (pixel) {
     }
 };
 
+/**
+ * 鼠标移动高亮显示
+ */
 map.on('pointermove', function (evt) {
     if (evt.dragging) {
         return;
@@ -216,7 +223,7 @@ var sendSelectedFeatureInfo = function (evt) {
 };
 
 var selectedList = [];
-map.on('dblclick', function (evt) {
+map.on('singleclick', function (evt) {
     switch ($("#analysis_type_select").val()) {
         case "buffer":
             sendFeatureInfo(evt);
@@ -228,17 +235,16 @@ map.on('dblclick', function (evt) {
             sendSelectedFeatureInfo(evt);
             break;
         case "attributes":
-            sendFeatureInfo(evt);
-            break;
-        case "spatial":
-            sendFeatureInfo(evt);
+            sendFeatureInfoAttributes(evt);
             break;
         default:
             break;
     }
 });
 
-// 缓冲区分析
+/**
+ * 缓冲区分析==========》》》》选择好 featureID 传输给后端，返回geometry
+ */
 var sendFeatureInfo = function (evt) {
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
         return feature;
@@ -246,7 +252,6 @@ var sendFeatureInfo = function (evt) {
 
     if (feature) {
         let bufferRadius = $("#analysis_input").val();
-        console.log(bufferRadius);
         var params = {
             "bufferRadius": bufferRadius,
             "fid": [feature.getId()]
@@ -254,12 +259,13 @@ var sendFeatureInfo = function (evt) {
         $.ajax({
             type: 'post',
             contentType: "application/json",
-            url: 'http://localhost:8899/bcgis/mapservice/buffer/bufferAnalysis',
+            url: 'http://localhost:8899/bcgis/mapservice/Analysis/buffer',
             data: JSON.stringify(params),
             success: function (data) {
-                vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+                VS.addFeatures((new GeoJSON()).readFeatures(data));
                 var vectorLayer2 = new VectorLayer({
-                    source: vectorSource
+                    source: VS,
+                    style: highlightStyle
                 });
                 map.addLayer(vectorLayer2);
             },
@@ -281,7 +287,10 @@ var sendFeatureInfo = function (evt) {
     }
 };
 
-// 联合分析
+
+/**
+ * 联合分析==========》》》》选择好 featureID 传输给后端，返回geometry
+ */
 $("#analysis_btn_union").click(function () {
     var params = {
         "fid": selectedList
@@ -291,67 +300,12 @@ $("#analysis_btn_union").click(function () {
     $.ajax({
         type: 'post',
         contentType: "application/json",
-        url: 'http://localhost:8899/bcgis/mapservice/buffer/unionAnalysis',
+        url: 'http://localhost:8899/bcgis/mapservice/Analysis/union',
         data: JSON.stringify(params),
         success: function (data) {
-            vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+            VS.addFeatures((new GeoJSON()).readFeatures(data));
             var vectorLayer2 = new VectorLayer({
-                source: vectorSource
-            });
-            map.addLayer(vectorLayer2);
-        },
-        error: function (err) {
-            console.log('err: ');
-            console.log(JSON.stringify(err));
-        }
-    });
-});
-
-// 叠加分析
-$("#analysis_btn_intersect").click(function () {
-    var params = {
-        "fid": selectedList
-    };
-    selectedList = [];
-
-    $.ajax({
-        type: 'post',
-        contentType: "application/json",
-        url: 'http://localhost:8899/bcgis/mapservice/buffer/intersectionAnalysis',
-        data: JSON.stringify(params),
-        success: function (data) {
-            vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
-            var vectorLayer2 = new VectorLayer({
-                source: vectorSource
-            });
-            map.addLayer(vectorLayer2);
-        },
-        error: function (err) {
-            console.log('err: ');
-            console.log(JSON.stringify(err));
-        }
-    });
-});
-
-// 属性查询
-$("#analysis_btn_attributes").click(function () {
-    // 可选取多个参数
-    let attributes = $("#attributes_analysis_input").val();
-    console.log(attributes);
-    var params = {
-        "attributes": attributes,
-        "fid": "5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301" // 后期优化需自动获取
-    };
-
-    $.ajax({
-        type: 'post',
-        contentType: "application/json",
-        url: 'http://localhost:8899/bcgis/mapservice/query/attributes',
-        data: JSON.stringify(params),
-        success: function (data) {
-            vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
-            var vectorLayer2 = new VectorLayer({
-                source: vectorSource,
+                source: VS,
                 style: highlightStyle
             });
             map.addLayer(vectorLayer2);
@@ -361,42 +315,26 @@ $("#analysis_btn_attributes").click(function () {
             console.log(JSON.stringify(err));
         }
     });
-
-    if (feature !== highlight) {
-        if (highlight) {
-            featureOverlay.getSource().removeFeature(highlight);
-        }
-        if (feature) {
-            featureOverlay.getSource().addFeature(feature);
-        }
-        highlight = feature;
-    }
 });
 
-// 空间查询
-$("#analysis_btn_spatial").click(function () {
-    let minX = $("#spatial_analysis_minX").val();
-    let minY = $("#spatial_analysis_minY").val();
-    let maxX = $("#spatial_analysis_maxX").val();
-    let maxY = $("#spatial_analysis_maxY").val();
+/**
+ * 叠加分析 ==========》》》》选择好 featureID 传输给后端，返回geometry
+ */
+$("#analysis_btn_intersect").click(function () {
     var params = {
-        "minX": minX,
-        "minY": minY,
-        "maxX": maxX,
-        "maxY": maxY,
-        "fid": "5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301"
+        "fid": selectedList
     };
+    selectedList = [];
 
     $.ajax({
         type: 'post',
         contentType: "application/json",
-        url: 'http://localhost:8899/bcgis/mapservice/query/spatial',
+        url: 'http://localhost:8899/bcgis/mapservice/Analysis/intersection',
         data: JSON.stringify(params),
         success: function (data) {
             vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
             var vectorLayer2 = new VectorLayer({
-                source: vectorSource,
-                // style: highlightStyle
+                source: vectorSource
             });
             map.addLayer(vectorLayer2);
         },
@@ -405,44 +343,123 @@ $("#analysis_btn_spatial").click(function () {
             console.log(JSON.stringify(err));
         }
     });
-
-    if (feature !== highlight) {
-        if (highlight) {
-            featureOverlay.getSource().removeFeature(highlight);
-        }
-        if (feature) {
-            featureOverlay.getSource().addFeature(feature);
-        }
-        highlight = feature;
-    }
 });
 
+/**
+ * 属性查询第一步 =======》》》根据 fid 获取当前地图具体有哪些属性，然后以表格的形式展现出
+ */
+var sendFeatureInfoAttributes = function (evt) {
+    var fid = wfsParams.typeName;
+    var params = {
+        "fid": fid
+    };
+    $.ajax({
+        type: 'post',
+        contentType: "application/json",
+        url: 'http://localhost:8899/bcgis/mapservice/query/attributes',
+        data: JSON.stringify(params),
+        success: function (data) {
+            var keys = [];
+            var values = [];
+            for (var key in data) {
+                keys.push(key);
+                values.push(data[key]);
+            }
+            // 创建表格展现查询得到的属性
+            var rows = keys.length;     // 行数
+            var column = 2;             // 列数
+            var tab = '<table border=1 width="500" cellpadding="10" align="center" id="mytable">'
+            tab += "<caption>属性查询表</caption>";
+            tab += "<tr><th>Key</th>\
+                                <th>Value</th>"
+            for (var i = 0; i < rows; i++) {
+                tab += '<tr>'
+                for (var j = 0; j < column; j++) {
+                    if (j == 0) {
+                        // tab += "<td ><label style=\"color:blue; text-align: center;\" >" + keys[i] + "</label></td>"
+                        tab += "<td >" + keys[i] + "</td>"
+                    } else {
+                        tab += "<td ><input  value=\"" + values[i] + "\"   id=\"" + keys[i] + "\">" + "</input></td>"
+                    }
+                }
+                tab += '</tr>';
+            }
+            tab += '</table>';
+            // 显示表格
+            div1.innerHTML = tab
+            $("#analysis_type1_attributes").hide();
+            $("#analysis_btn_attributes").show();
+        },
+    });
+};
 
-// 框选查询
+/**
+ * 属性查询第二步 =======》》》根据表单获取查询条件组成的Json字符串，传输给后端查询得到空间几何信息
+ */
+$("#analysis_btn_attributes").click(function () {
+    // var form = new FormData(document.getElementById("queryProp"));
+    var table = document.getElementById("mytable");
+    var json = {};
+    for (var i = 1; i < table.rows.length; i++) {
+        for (var j = 0; j < table.rows[i].cells.length; j++) {
+            if (j == 0) {
+                var key = table.rows[i].cells[j].innerHTML;
+                var value = document.getElementById(key).value;
+                if (value.length != 0) {
+                    json[key] = value;
+                }
+            }
+        }
+    }
+
+    // 将得到的数据传输到后端解析
+    var params = json;
+    var fid = wfsParams.typeName;
+    params["fid"] = fid;
+    console.log(params);
+    $.ajax({
+        type: 'post',
+        contentType: "application/json",
+        url: 'http://localhost:8899/bcgis/mapservice/query/attributes',
+        data: JSON.stringify(params),
+        success: function (data) {
+            VS.addFeatures((new GeoJSON()).readFeatures(data)); // VS为重新定义的图层，增加feature可高亮显示
+            var vectorLayer2 = new VectorLayer({
+                source: VS,
+                style: highlightStyle
+            });
+            map.addLayer(vectorLayer2);
+        },
+        error: function (err) {
+            console.log('err: ');
+            console.log(JSON.stringify(err));
+        }
+    });
+});
+
+/**
+ * 空间查询======》》》》以框选的方式得到查询范围，传输给后端返回查询得到的空间几何信息
+ */
 $("#query_btn_intersect").click(function () {
 
     // 增加地图框选功能
-    // a normal select interaction to handle click
     var select = new Select();
     map.addInteraction(select);
-
     var selectedFeatures = select.getFeatures();
-
     // a DragBox interaction used to select features by drawing boxes
     var dragBox = new DragBox({
         condition: platformModifierKeyOnly
     });
-
     map.addInteraction(dragBox);
-
     dragBox.on('boxstart', function (evt) {
         var minX = evt.coordinate[0];
         var maxY = evt.coordinate[1];
         document.getElementById("minX").innerHTML = minX;
         document.getElementById("maxY").innerHTML = maxY;
-
     });
 
+    // 加入fid
+    var fid = wfsParams.typeName;
     dragBox.on('boxend', function (evt) {
 
         var maxX = evt.coordinate[0];
@@ -455,7 +472,7 @@ $("#query_btn_intersect").click(function () {
             "minY": minY,
             "maxX": maxX,
             "maxY": maxY,
-            "fid": "5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301"
+            "fid": fid
         };
         console.log(params);
         $.ajax({
@@ -464,10 +481,10 @@ $("#query_btn_intersect").click(function () {
             url: 'http://localhost:8899/bcgis/mapservice/query/spatial',
             data: JSON.stringify(params),
             success: function (data) {
-                vectorSource.addFeatures((new GeoJSON()).readFeatures(data));
+                VS.addFeatures((new GeoJSON()).readFeatures(data));
                 var vectorLayer2 = new VectorLayer({
-                    source: vectorSource,
-                    // style: highlightStyle  // 这个增加的图层显示效果是将全部的数据进行图层叠加
+                    source: VS,
+                    style: highlightStyle  // 这个增加的图层显示效果是将全部的数据进行图层叠加
                 });
                 map.addLayer(vectorLayer2);
             },
@@ -518,12 +535,3 @@ $("#query_btn_intersect").click(function () {
         }
     });
 });
-
-
-
-
-
-
-
-
-

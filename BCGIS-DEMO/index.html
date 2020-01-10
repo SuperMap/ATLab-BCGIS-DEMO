@@ -18,7 +18,7 @@
         <div id="popup-content"></div>
     </div>
     <div id="option">
-        <form id="publish_form">
+        <form id="publish_form" enctype="multipart/form-data">
             <fieldset>
                 <p>
                     <label for="analysis_type_label">分析类型：</label>
@@ -32,7 +32,7 @@
                 </p>
                 <p id="params">
                     <label for="analysis_type_label">缓冲区半径：</label>
-                    <input type="select" id="analysis_input" value="0.01"></input>
+                    <input type="select" id="analysis_input" value="0.05"></input>
                 </p>
                 <p>
                     <button type="button" id="analysis_btn_union" hidden="hidden">联合分析</button>
@@ -40,18 +40,22 @@
                 <p>
                     <button type="button" id="analysis_btn_intersect" hidden="hidden">叠加分析</button>
                 </p>
-                <p id="attributesParams" hidden="hidden">
-                    <label for="attributes_type_label">输入属性: </label>
-                    <input type="select" id="attributes_analysis_input" value="shuangliuqu"></input>
-                    <button type="button" id="analysis_btn_attributes">查询</button>
-                </p>
                 <p>
-                    <button type="button" id="query_btn_intersect" hidden="hidden">查询</button>
+                    <button type="button" id="query_btn_intersect" hidden="hidden">点击框选</button>
                 </p>
                 <p id="minX" hidden="hidden"></p>
                 <p id="minY" hidden="hidden"></p>
                 <p id="maxX" hidden="hidden"></p>
                 <p id="maxY" hidden="hidden"></p>
+            </fieldset>
+        </form>
+        <form id="queryProp" enctype="multipart/form-data">
+            <fieldset>
+                <p id="attributesParams" hidden="hidden">
+                    <label for="analysis_type_attributes" id="analysis_type1_attributes" class="col-md-1 control-label" style="white-space:nowrap"> 点击地图获取属性查询表 </label>
+                    <div id="div1"></div>
+                    <button type="button" id="analysis_btn_attributes" hidden="hidden"> 属性查询 </button>
+                </p>
             </fieldset>
         </form>
     </div>

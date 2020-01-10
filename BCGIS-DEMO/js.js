@@ -2,10 +2,8 @@
 /**
  *  展示系统的界面设置   
  */
-
 $(document).ready(function () {
 
-    // 导航栏
     $("#header").html("<ul> \
         <li><a href=\"\"><b> >>== 区块链GIS系统DEMO ==<< </b></a></li> \
         <li><a href=\"index.html\" id=\"index_bar\">显示地图</a></li> \
@@ -14,7 +12,6 @@ $(document).ready(function () {
         <li><a href=\"#\" id=\"info\"></a></li> \
         </ul>");
 
-    // 发布地图（时间为点击）
     $("#publish_btn").click(function () {
         var params = {
             "workspaceName": document.getElementById("publish_workspace").value,
@@ -56,7 +53,9 @@ $(document).ready(function () {
         });
     });
 
-    // 分析的选择，当选择不同按钮时出现不同的显示效果
+    /**
+     * 分析的选择，当选择不同按钮时出现不同的显示效果
+     */
     $("#analysis_type_select").click(function () {
         switch ($("#analysis_type_select").val()) {
 
@@ -68,6 +67,7 @@ $(document).ready(function () {
                 $("#analysis_btn_intersect").hide();
                 $("#spatialParams").hide();
                 $("#attributes_type_label").hide();
+                $("#query_btn_intersect").hide();
                 break;
 
             case "union":
@@ -78,6 +78,7 @@ $(document).ready(function () {
                 $("#analysis_btn_intersect").hide();
                 $("#spatialParams").hide();
                 $("#attributes_type_label").hide();
+                $("#query_btn_intersect").hide();
                 break;
 
             case "intersection":
@@ -88,28 +89,20 @@ $(document).ready(function () {
                 $("#analysis_btn_union").hide();
                 $("#spatialParams").hide();
                 $("#attributes_type_label").hide();
+                $("#query_btn_intersect").hide();
                 break;
 
             case "attributes":
                 $("#attributesParams").show();
                 $("#attributes_analysis_input").show();
+                $("#analysis_btn_attributes").hide();
 
                 $("#params").hide();
                 $("#analysis_btn_union").hide();
                 $("#analysis_btn_intersect").hide();
                 $("#spatialParams").hide();
                 $("#attributes_type_label").hide();
-                break;
-
-            case "spatial":
-                $("#spatialParams").show();
-                $("#attributes_type_label").show();
-
-                $("#attributesParams").hide();
-                $("#attributes_analysis_input").hide();
-                $("#params").hide();
-                $("#analysis_btn_union").hide();
-                $("#analysis_btn_intersect").hide();
+                $("#query_btn_intersect").hide();
                 break;
 
             case "query":
@@ -124,7 +117,6 @@ $(document).ready(function () {
                 $("#analysis_btn_union").hide();
                 $("#analysis_btn_intersect").hide();
                 break;
-
         }
     });
 });
