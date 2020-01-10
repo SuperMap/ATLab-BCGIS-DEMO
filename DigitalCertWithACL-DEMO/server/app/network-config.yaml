@@ -59,7 +59,7 @@ channels:
     # this list with the query results of getInstalledChaincodes() and getInstantiatedChaincodes()
     chaincodes:
       # the format follows the "cannonical name" of chaincodes by fabric code
-      - aclcc:v0.5
+      - aclcc
 
 #
 # list of participating organizations in this network
@@ -77,9 +77,9 @@ organizations:
     certificateAuthorities:
       - ca.orgb.example.com
     adminPrivateKey:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/keystore/8f62dc9246ad04465ae36bafa78267828ef1688bf84ce9c19c69c4a36e60080a_sk
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/keystore/9f7a71c224dd2f529fe412c13e062cffcc335a6b8cf76e78bc8a10399dacd0e7_sk
     signedCert:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/signcerts/Admin@orgb.example.com-cert.pem
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/signcerts/Admin@orgb.example.com-cert.pem
 
 #
 # List of orderers to send transaction and channel create/update requests to. For the time
@@ -96,7 +96,7 @@ orderers:
       ssl-target-name-override: orderer1.example.com
 
     tlsCACerts:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 
 #
 # List of peers to send various requests to, including endorsement, query
@@ -109,7 +109,7 @@ peers:
     grpcOptions:
       ssl-target-name-override: peer0.orgb.example.com
     tlsCACerts:
-      path: /home/cy/Documents/ATL/SuperMap/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/tlsca/tlsca.orgb.example.com-cert.pem
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/tlsca/tlsca.orgb.example.com-cert.pem
 #
 # Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
 # certificate management to be done via REST APIs. Application may choose to use a standard
