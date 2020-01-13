@@ -2,7 +2,7 @@
  * @Author: mikey.zhaopeng 
  * @Date: 2019-12-25 16:28:52 
  * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2020-01-10 10:31:13
+ * @Last Modified time: 2020-01-13 15:08:17
  */
 import 'ol/ol.css';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -14,6 +14,9 @@ import { Fill, Stroke, Style, Text } from 'ol/style';
 import Overlay from 'ol/Overlay';
 import { platformModifierKeyOnly } from 'ol/events/condition';
 import { DragBox, Select } from 'ol/interaction';
+import Modify from 'ol/interaction/Modify';
+import Draw from 'ol/interaction/Draw';
+import Snap from 'ol/interaction/Snap';
 
 
 /**
@@ -23,9 +26,7 @@ var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
 
-/**
- * Create an overlay to anchor the popup to the map.
- */
+// 为点击获得属性----1
 var overlay = new Overlay({
     element: container,
     autoPan: true,
@@ -34,10 +35,7 @@ var overlay = new Overlay({
     }
 });
 
-/**
- * Add a click handler to hide the popup.
- * @return {boolean} Don't follow the href.
- */
+// 为点击获得属性----2
 closer.onclick = function () {
     overlay.setPosition(undefined);
     closer.blur();
@@ -73,7 +71,7 @@ const map = new Map({
 map.addOverlay(overlay);
 
 /**
- * 获得地图 vectorSource
+ * 获得地图图层 vectorSource
  */
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
@@ -93,6 +91,54 @@ var vectorSource = new VectorSource({
 });
 
 /**
+ * 2020.1.13新加的
+ */
+// 添加 Modify 后就可以对图层进行修改了 -----》图上会有小圆点可进行修改（alt + click 删除点）
+map.addInteraction(new Modify({
+  source: vectorSource
+}));
+
+// 实现draw交互，可以使用户画新的features并添加到数据源中。(右键点击开始画图，右键双击闭合并停止，左键双击闭合不停止)-----》》双击画图和双击获取属性重合了
+// map.addInteraction(new Draw({
+//   type: 'Polygon',
+//   source: vectorSource
+// }));
+
+// snap交互可以帮我在编辑和画features时候保持拓扑结构 当draw、modify和snap三种交互都被激活的时候，我们就可以在编辑数据的同时保持它原有的拓扑关系
+map.addInteraction(new Snap({
+  source: vectorSource
+}));
+
+// 清除要素
+const clear = document.getElementById('clear');
+clear.addEventListener('click', function() {
+    vectorSource.clear();
+});
+// 下载GeoJson格式的数据
+const format = new GeoJSON({featureProjection: 'EPSG:3857'});
+const download = document.getElementById('download');
+vectorSource.on('change', function() {
+  const features = vectorSource.getFeatures();
+  const json = format.writeFeatures(features);
+  download.href = 'data:text/json;charset=utf-8,' + json;
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  * 获得地图 VS =====>>>>用于当有返回的feature时高亮显示地图
  */
 var VS = new VectorSource({});
@@ -104,6 +150,7 @@ window.loadFeatures = function (response) {
 var vectorLayer = new VectorLayer({
     source: vectorSource
 });
+// 将图层添加到资源中
 map.addLayer(vectorLayer);
 
 // 设置图层颜色
@@ -197,13 +244,13 @@ var displayFeatureInfo = function (pixel) {
 /**
  * 鼠标移动高亮显示
  */
-map.on('pointermove', function (evt) {
-    if (evt.dragging) {
-        return;
-    }
-    var pixel = map.getEventPixel(evt.originalEvent);
-    displayFeatureInfo(pixel);
-});
+// map.on('pointermove', function (evt) {
+//     if (evt.dragging) {
+//         return;
+//     }
+//     var pixel = map.getEventPixel(evt.originalEvent);
+//     displayFeatureInfo(pixel);
+// });
 
 var sendSelectedFeatureInfo = function (evt) {
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {

@@ -52,14 +52,20 @@
         <form id="queryProp" enctype="multipart/form-data">
             <fieldset>
                 <p id="attributesParams" hidden="hidden">
-                    <label for="analysis_type_attributes" id="analysis_type1_attributes" class="col-md-1 control-label" style="white-space:nowrap"> 点击地图获取属性查询表 </label>
+                    <label for="analysis_type_attributes" id="analysis_type1_attributes" class="col-md-1 control-label"
+                        style="white-space:nowrap"> 点击地图获取属性查询表 </label>
                     <div id="div1"></div>
                     <button type="button" id="analysis_btn_attributes" hidden="hidden"> 属性查询 </button>
                 </p>
             </fieldset>
         </form>
     </div>
-    <div id="map-container"></div>
+    <!-- 添加下载编辑元素的按钮 -->
+    <div id="tools">
+        <a id="clear">Clear</a>
+        <a id="download" download="features.json">Download</a>
+    </div>
+    <div id="map-container" class="map"></div>
 </body>
 
 </html>
