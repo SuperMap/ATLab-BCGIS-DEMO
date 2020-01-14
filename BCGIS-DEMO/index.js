@@ -1,9 +1,3 @@
-/*
- * @Author: mikey.zhaopeng 
- * @Date: 2019-12-25 16:28:52 
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2020-01-13 15:08:17
- */
 import 'ol/ol.css';
 import GeoJSON from 'ol/format/GeoJSON';
 import Map from 'ol/Map';
@@ -18,15 +12,12 @@ import Modify from 'ol/interaction/Modify';
 import Draw from 'ol/interaction/Draw';
 import Snap from 'ol/interaction/Snap';
 
-
-/**
-* Elements that make up the popup.
-*/
+// 为点击获得属性----0
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
 
-// 为点击获得属性----1
+// 为点击获得属性----1---->获得弹窗
 var overlay = new Overlay({
     element: container,
     autoPan: true,
@@ -42,15 +33,16 @@ closer.onclick = function () {
     return false;
 };
 
-
-// 成都市区 http://localhost:8080/geoserver/Test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Test%3A5668c664c852b2b95543b784371f0267136cb4e09b8cb4a284148d2b9f578301&maxFeatures=50&outputFormat=text%2Fjavascript
 // 北京市区 http://localhost:8080/geoserver/Test/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Test%3A6bff876faa82c51aee79068a68d4a814af8c304a0876a08c0e8fe16e5645fde4&maxFeatures=50&outputFormat=text%2Fjavascript
 //参数字段  
 var wfsParams = {
     service: "WFS",
     version: "1.0.0",
     request: "GetFeature",
-    typeName: "Test:6bff876faa82c51aee79068a68d4a814af8c304a0876a08c0e8fe16e5645fde4",  //图层名称      
+    typeName: "Test:6bff876faa82c51aee79068a68d4a814af8c304a0876a08c0e8fe16e5645fde4",  //图层名称 
+    // R  278934ff40e23d4a054144b495df7ca5eb0f764aa02d44f0cf02b8921539d8b1     
+    // D  6bff876faa82c51aee79068a68d4a814af8c304a0876a08c0e8fe16e5645fde4
+    // BL d7e94bf0c86c94579e8b564d2dea995ed3746108f98f003fb555bcd41831f885
     outputFormat: "text/javascript",  //重点，不要改变  
     format_options: "callback:loadFeatures"  //回调函数声明  
 };
@@ -75,7 +67,7 @@ map.addOverlay(overlay);
  */
 var vectorSource = new VectorSource({
     format: new GeoJSON(),
-    // url: "./data/beijing.json",
+    // url: "./data/features.json", // 可直接加载外部地图数据
     loader: function (extent, resolution, projection) {  //加载函数  
         var url = "http://localhost:8080/geoserver/wfs";
         $.ajax({
@@ -84,65 +76,17 @@ var vectorSource = new VectorSource({
             type: "GET",
             dataType: "jsonp",   //解决跨域的关键  
             jsonpCallback: "loadFeatures"  //回调  
-
         });
     },
     projection: "EPSG:4326"
 });
 
 /**
- * 2020.1.13新加的
- */
-// 添加 Modify 后就可以对图层进行修改了 -----》图上会有小圆点可进行修改（alt + click 删除点）
-map.addInteraction(new Modify({
-  source: vectorSource
-}));
-
-// 实现draw交互，可以使用户画新的features并添加到数据源中。(右键点击开始画图，右键双击闭合并停止，左键双击闭合不停止)-----》》双击画图和双击获取属性重合了
-// map.addInteraction(new Draw({
-//   type: 'Polygon',
-//   source: vectorSource
-// }));
-
-// snap交互可以帮我在编辑和画features时候保持拓扑结构 当draw、modify和snap三种交互都被激活的时候，我们就可以在编辑数据的同时保持它原有的拓扑关系
-map.addInteraction(new Snap({
-  source: vectorSource
-}));
-
-// 清除要素
-const clear = document.getElementById('clear');
-clear.addEventListener('click', function() {
-    vectorSource.clear();
-});
-// 下载GeoJson格式的数据
-const format = new GeoJSON({featureProjection: 'EPSG:3857'});
-const download = document.getElementById('download');
-vectorSource.on('change', function() {
-  const features = vectorSource.getFeatures();
-  const json = format.writeFeatures(features);
-  download.href = 'data:text/json;charset=utf-8,' + json;
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
  * 获得地图 VS =====>>>>用于当有返回的feature时高亮显示地图
  */
 var VS = new VectorSource({});
 
+// 调用回调函数 数据和属性信息全在 response 里面
 window.loadFeatures = function (response) {
     vectorSource.addFeatures((new GeoJSON()).readFeatures(response));  //载入要素
 };
@@ -153,20 +97,51 @@ var vectorLayer = new VectorLayer({
 // 将图层添加到资源中
 map.addLayer(vectorLayer);
 
-// 设置图层颜色
-var highlightStyle = new Style({
+/**
+ * 2020.1.13新加的
+ */
+// // 添加 Modify 后就可以对图层进行修改了 -----》图上会有小圆点可进行修改（alt + click 删除点）
+// // map.addInteraction(new Modify({
+// //   source: vectorSource
+// // }));
 
+// // 实现draw交互，可以使用户画新的features并添加到数据源中。(右键点击开始画图，右键双击闭合并停止，左键双击闭合不停止)-----》》双击画图和双击获取属性重合了
+// map.addInteraction(new Draw({
+//   type: 'Polygon',
+//   source: vectorSource
+// }));
+
+// // snap交互可以帮我在编辑和画features时候保持拓扑结构 当draw、modify和snap三种交互都被激活的时候，我们就可以在编辑数据的同时保持它原有的拓扑关系
+// map.addInteraction(new Snap({
+//   source: vectorSource
+// }));
+
+// // 清除要素
+const clear = document.getElementById('clear');
+clear.addEventListener('click', function() {
+    vectorSource.clear();
+    VS.clear();
+});
+// 下载GeoJson格式的数据
+const format = new GeoJSON({featureProjection: 'EPSG:3857'});
+const download = document.getElementById('download');
+vectorSource.on('change', function() {
+  const features = vectorSource.getFeatures();
+  const json = format.writeFeatures(features);
+  download.href = 'data:text/json;charset=utf-8,' + json;
+});
+
+// 设置新加图层VS的图层颜色
+var highlightStyle = new Style({
     // 设置边框颜色
     stroke: new Stroke({
         color: '#f00',
         width: 1
     }),
-
     // 设置填充颜色
     fill: new Fill({
         color: '#ff0',
     }),
-
     // 设置里面字体的颜色
     text: new Text({
         font: '12px Calibri,sans-serif',
@@ -183,17 +158,17 @@ var highlightStyle = new Style({
 /**
  * 高亮显示单个属性
  */
-var featureOverlay = new VectorLayer({
-    source: new VectorSource(),
-    map: map,
-    style: function (feature) {
-        // highlightStyle.getText().setText(feature.get('AdminCode'));   // 属性在feature里面，首先需要拿出来，然后实现
-        return highlightStyle;
-    }
-});
+// var featureOverlay = new VectorLayer({
+//     source: new VectorSource(),
+//     map: map,
+//     style: function (feature) {
+//         // highlightStyle.getText().setText(feature.get('AdminCode'));   // 属性在feature里面，首先需要拿出来，然后实现
+//         return highlightStyle;
+//     }
+// });
 
 /**
- * 实现双击图层获得属性 dblclick singleclick
+ * 双击获取图层属性
  */
 map.on('dblclick', function (evt) {
 
@@ -218,31 +193,34 @@ map.on('dblclick', function (evt) {
     }
 });
 
-var highlight;
-var displayFeatureInfo = function (pixel) {
-    // 得到feature，里面的value为属性
-    var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
-        return feature;
-    });
+// /**
+//  * 这个是为移动鼠标高亮显示准备的，暂时未用到-----》》》》》暂时找到的就是这里的问题
+//  */
+// var highlight;
+// var displayFeatureInfo = function (pixel) {
+//     // 得到feature，里面的value为属性
+//     var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+//         return feature;
+//     });
 
-    var info = document.getElementById('info');
-    if (feature) {
-        info.innerHTML = "ID : " + feature.getId();
-    }
+//     var info = document.getElementById('info');
+//     if (feature) {
+//         info.innerHTML = "ID : " + feature.getId();
+//     }
 
-    if (feature !== highlight) {
-        if (highlight) {
-            featureOverlay.getSource().removeFeature(highlight);
-        }
-        if (feature) {
-            featureOverlay.getSource().addFeature(feature);
-        }
-        highlight = feature;
-    }
-};
+//     if (feature !== highlight) {
+//         if (highlight) {
+//             featureOverlay.getSource().removeFeature(highlight);
+//         }
+//         if (feature) {
+//             featureOverlay.getSource().addFeature(feature);
+//         }
+//         highlight = feature;
+//     }
+// };
 
 /**
- * 鼠标移动高亮显示
+ * 鼠标移动高亮显示---->>>太占内存了，暂时不用
  */
 // map.on('pointermove', function (evt) {
 //     if (evt.dragging) {
@@ -252,21 +230,20 @@ var displayFeatureInfo = function (pixel) {
 //     displayFeatureInfo(pixel);
 // });
 
+// 点击图像事件获取feture
 var sendSelectedFeatureInfo = function (evt) {
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
         return feature;
     });
-
     if (feature) {
         selectedList[selectedList.length] = feature.getId();
     }
-
-    if (feature !== highlight) {
-        if (feature) {
-            featureOverlay.getSource().addFeature(feature);
-        }
-        highlight = feature;
-    }
+    // if (feature !== highlight) {
+    //     if (feature) {
+    //         featureOverlay.getSource().addFeature(feature);
+    //     }
+    //     highlight = feature;
+    // }
 };
 
 var selectedList = [];
@@ -289,6 +266,9 @@ map.on('singleclick', function (evt) {
     }
 });
 
+
+// ------------------------》》》》  以下为缓冲区等数据分析和查询，如果不用，不会涉及到，不占内存，暂时不考虑 《《《《---------------
+
 /**
  * 缓冲区分析==========》》》》选择好 featureID 传输给后端，返回geometry
  */
@@ -309,6 +289,7 @@ var sendFeatureInfo = function (evt) {
             url: 'http://localhost:8899/bcgis/mapservice/Analysis/buffer',
             data: JSON.stringify(params),
             success: function (data) {
+                console.log(data.JSON)
                 VS.addFeatures((new GeoJSON()).readFeatures(data));
                 var vectorLayer2 = new VectorLayer({
                     source: VS,
@@ -323,15 +304,15 @@ var sendFeatureInfo = function (evt) {
         });
     }
 
-    if (feature !== highlight) {
-        if (highlight) {
-            featureOverlay.getSource().removeFeature(highlight);
-        }
-        if (feature) {
-            featureOverlay.getSource().addFeature(feature);
-        }
-        highlight = feature;
-    }
+    // if (feature !== highlight) {
+    //     if (highlight) {
+    //         featureOverlay.getSource().removeFeature(highlight);
+    //     }
+    //     if (feature) {
+    //         featureOverlay.getSource().addFeature(feature);
+    //     }
+    //     highlight = feature;
+    // }
 };
 
 
