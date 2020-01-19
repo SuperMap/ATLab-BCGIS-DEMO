@@ -76,8 +76,8 @@
             <groupId>com.supermap.atlab.blockchain</groupId>
             <artifactId>sdk-java</artifactId>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/atlchain-sdk-0.0.3.jar</systemPath>
-            <version>0.0.3</version>
+            <systemPath>${basedir}/lib/atlchain-sdk-0.0.4.jar</systemPath>
+            <version>0.0.4</version>
         </dependency>
 
         <!--Unit Test Dependency-->
