@@ -1,7 +1,7 @@
 /**
  *  展示系统的界面设置
  */
-$(document).ready(function () {
+$(document).ready(function() {
     // 导航栏
     $("#header").html('<ul> \
         <li><a href=""><b> >>== 区块链 s3m 展示系统 ==<< </b></a></li> \
@@ -29,7 +29,7 @@ $(document).ready(function () {
             // contentType: "application/json",
             url: "http://localhost:8081/server_war_exploded/webapi/blockchain/history" + params,
             // data: JSON.stringify(params),
-            success: function (data) {
+            success: function(data) {
                 console.log(data);
                 let recoreds = JSON.parse(data);
 
@@ -49,7 +49,7 @@ $(document).ready(function () {
                 tab += '</table>';
                 $("#version_list").html(tab);
             },
-            error: function (err) {
+            error: function(err) {
                 console.log('err: ');
                 console.log(JSON.stringify(err));
             }
@@ -74,7 +74,7 @@ $(document).ready(function () {
             // contentType: "application/json",
             url: "http://localhost:8081/server_war_exploded/webapi/blockchain/history" + params,
             // data: JSON.stringify(params),
-            success: function (data) {
+            success: function(data) {
                 let recoreds = JSON.parse(data);
                 var viewer = new Cesium.Viewer('cesiumContainer');
                 var scene = viewer.scene;
@@ -92,30 +92,30 @@ $(document).ready(function () {
                     //     }
                     // });
                     // Create an initial camera view
-                    var initialPosition = new Cesium.Cartesian3.fromDegrees(116.3950 , 40.0172, 53.411); //116.3950 , 40.0172, 53.411
-                    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(-155, -36, 0.0);//155, -36, 0.0 第一个参数负责模型转向
+                    var initialPosition = new Cesium.Cartesian3.fromDegrees(116.3950, 40.0172, 53.411); //116.3950 , 40.0172, 53.411
+                    var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(-155, -36, 0.0); //155, -36, 0.0 第一个参数负责模型转向
                     var homeCameraView = {
-                        destination : initialPosition,
-                        orientation : {
-                            heading : initialOrientation.heading,
-                            pitch : initialOrientation.pitch,
-                            roll : initialOrientation.roll
+                        destination: initialPosition,
+                        orientation: {
+                            heading: initialOrientation.heading,
+                            pitch: initialOrientation.pitch,
+                            roll: initialOrientation.roll
                         }
                     };
                     // Set the initial view
                     viewer.scene.camera.setView(homeCameraView);
 
                     // 定义数据展示的位置
-                    var points = [116.395074412521, 40.0167102653286, 5.4119813283905];//116.395074412521, 40.0167102653286, 5.4119813283905
-                    var s3mFilePath = recoreds[mapid]["Record"][0]["SHash"];
+                    var points = [116.395074412521, 40.0167102653286, 5.4119813283905]; //116.395074412521, 40.0167102653286, 5.4119813283905
+                    var s3mFilePath = recoreds[mapid]["Record"]["SHash"];
                     for (var i = 0; i < s3mFilePath.length; i++) {
                         // var temp1 = ss[i];
                         var exam = 'http://localhost:8081/server_war_exploded/s3m/' + s3mFilePath[i]
                         var keymap = {};
                         keymap[exam] = [];
                         var layer = new Cesium.DynamicLayer3D(scene._context, [exam]);
-                        layer.updateInterval = 500;//动态图层更新时间
-                        layer.enableLocalOffset = false;//禁止模型局部偏移
+                        layer.updateInterval = 500; //动态图层更新时间
+                        layer.enableLocalOffset = false; //禁止模型局部偏移
                         scene.primitives.add(layer);
                         var pillarState = new Cesium.DynamicObjectState({
                             id: i,
@@ -139,9 +139,9 @@ $(document).ready(function () {
         });
     }
 
-    $('body').on('click', '.showclass', function () {
+    $('body').on('click', '.showclass', function() {
         // 获取鼠标点击元素的 id
-        $(document).click(function (e) { // 在页面任意位置点击而触发此事件
+        $(document).click(function(e) { // 在页面任意位置点击而触发此事件
             var v_id = $(e.target).attr('id');
             show($("#" + v_id).html().trim());
             $(document).unbind("click");
@@ -169,12 +169,12 @@ $(document).ready(function () {
             data: form,
             processData: false,
             contentType: false,
-            success: function (data) {
+            success: function(data) {
                 alert(data);
                 // console.log(data);
                 // console.log('data: ' + JSON.stringify(data));
             },
-            error: function (e) {
+            error: function(e) {
                 // alert("错误！！");
             }
         });
