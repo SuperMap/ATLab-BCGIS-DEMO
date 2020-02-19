@@ -2,10 +2,10 @@ package com.supermap.atlab.blockchain;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.atlchain.sdk.ATLChain;
 import com.supermap.atlab.storage.Hdfs;
 import com.supermap.atlab.utils.Kml;
 import com.supermap.atlab.utils.Utils;
+import com.supermap.blockchain.sdk.SmChain;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -25,7 +25,17 @@ import java.util.logging.Logger;
 @Path("/blockchain")
 public class Blockchain {
 
-    private ATLChain atlChain;
+    private File networkFile = new File(this.getClass().getResource("/network-config-testC.yaml").getPath());
+
+    private SmChain smChain;
+
+    public Blockchain() {
+
+        smChain = SmChain.getSmChain("txchannel", networkFile);
+        hdfs = new Hdfs();
+    }
+
+
     Hdfs hdfs;
     Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -35,21 +45,27 @@ public class Blockchain {
     final private File networkConfigFile = new File("E:\\DemoRecording\\A_SuperMap\\ATLab-examples\\server\\src\\main\\resources\\network-config-test.yaml");
 
     //    final private File networkConfigFile = new File(/this.getClass().getResource("/network-config-test.yaml").getPath());
-    final private String chaincodeName = "bimcc";
-
-    public Blockchain() throws InterruptedException, IOException, URISyntaxException {
-        atlChain = new ATLChain(networkConfigFile);
-        hdfs = new Hdfs();
-    }
+//    final private String chaincodeName = "bimcc";
+    final private String chaincodeName = "testCommon";
+    //    private ATLChain atlChain;
+//    public Blockchain() throws InterruptedException, IOException, URISyntaxException {
+//        atlChain = new ATLChain(networkConfigFile);
+//        hdfs = new Hdfs();
+//    }
 
     @GET
     public String GetRecord(
             @QueryParam("modelid") String key
     ) {
 //        String key = "modelidaa-sidaDa"; // "model002-doorl1";
-        String functionName = "GetRecord";
+        String functionName = "GetRecordByKey";
 
-        String result = atlChain.query(
+//        String result = atlChain.query(
+//                chaincodeName,
+//                functionName,
+//                new String[]{key}
+//        );
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 functionName,
                 new String[]{key}
@@ -76,7 +92,6 @@ public class Blockchain {
         return result;
     }
 
-    // TODO 接收json参数
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String PutRecord(
@@ -106,11 +121,13 @@ public class Blockchain {
                     e.printStackTrace();
                 }
 
-                InputStream in = bodyPartEntity.getInputStream();
-                // hdfs存储
-                hdfs.hdfsUploadFile(in, hash);
+                InputStream inLocal = bodyPartEntity.getInputStream();
                 // 保存本地文件
-//                Utils.saveFile(in, s3mDirPath + hash);
+                Utils.saveFile(inLocal, s3mDirPath + hash);
+                InputStream inHdfs = bodyPartEntity.getInputStream();
+                // hdfs存储
+                hdfs.hdfsUploadFile(inHdfs, hash);
+
             }
         });
         JSONArray jsonArray = new JSONArray();
@@ -142,7 +159,12 @@ public class Blockchain {
 //        String key = "modelidaa-sidaa";
         String functionName = "GetHistoryByKey";
 
-        String result = atlChain.query(
+//        String result = atlChain.query(
+//                chaincodeName,
+//                functionName,
+//                new String[]{key}
+//        );
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 functionName,
                 new String[]{key}
@@ -153,9 +175,10 @@ public class Blockchain {
         resultJsonArray.get(0);
         for (Object o : resultJsonArray) {
             JSONObject jsonObject = (JSONObject) o;
-            JSONArray recordJSONArray = (JSONArray) jsonObject.get("Record");
-            jsonObject = (JSONObject) recordJSONArray.get(0);
-            recordJSONArray = (JSONArray) jsonObject.get("SHash");
+//            System.out.println(jsonObject);
+            JSONArray recordJSONArray = (JSONArray) ((JSONObject) jsonObject.get("Record")).get("SHash");
+//            jsonObject = (JSONObject) recordJSONArray.get(0);
+//            recordJSONArray = (JSONArray) jsonObject.get("SHash");
             for (Object hashObj : recordJSONArray) {
                 if (!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
                     // TODO 当文件在HDFS中不存在时如何处理？？？
@@ -185,7 +208,12 @@ public class Blockchain {
         }
         String functionName = "GetRecordBySelector";
 
-        String result = atlChain.query(
+//        String result = atlChain.query(
+//                chaincodeName,
+//                functionName,
+//                new String[]{selector}
+//        );
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 functionName,
                 new String[]{selector}
@@ -196,9 +224,10 @@ public class Blockchain {
         resultJsonArray.get(0);
         for (Object o : resultJsonArray) {
             JSONObject jsonObject = (JSONObject) o;
-            JSONObject recordJSON = (JSONObject) jsonObject.get("Record");
-            JSONArray shashList = (JSONArray) recordJSON.get("SHash");
-            for (Object hashObj : shashList) {
+//            JSONObject recordJSON = (JSONObject) jsonObject.get("Record");
+            JSONArray recordJSONArray = (JSONArray) ((JSONObject) jsonObject.get("Record")).get("SHash");
+//            JSONArray shashList = (JSONArray) recordJSON.get("SHash");
+            for (Object hashObj : recordJSONArray) {
                 if (!Files.exists(Paths.get(s3mDirPath, hashObj.toString()))) {
                     // TODO 当文件在HDFS中不存在时如何处理？？？
                     String res = hdfs.hdfsDownloadFile(hashObj.toString(), s3mDirPath + hashObj.toString());
@@ -219,7 +248,7 @@ public class Blockchain {
     ) {
         String functionName = "DelRecord";
 
-        String result = atlChain.query(
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 functionName,
                 new String[]{key}
@@ -228,19 +257,19 @@ public class Blockchain {
     }
 
     /**
-     * 内部测试 saveSingleS3m && saveALLS3mMoudle && redefineModel
+     * TODO 内部测试 saveSingleS3m && saveALLS3mMoudle && redefineModel
      * @param modelid
      */
     public void storageS3mFile(String modelid) {
-        // TODO 单个与整体的存储测试
-//        JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
+        // 单个与整体的存储测试
+        JSONArray jsonArrayS3m = Kml.readS3m("modelidaa", "E:\\SuperMapData\\test\\saveTest");
 //        System.out.println(jsonArrayS3m);
-//        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
-//        System.out.println(jsonToAll);
-//        saveALLS3mMoudle(modelid, jsonToAll);
-//        redefineModel(modelid, jsonArrayS3m);
+        JSONArray jsonToAll = saveSingleS3m(modelid, jsonArrayS3m);
+        System.out.println(jsonToAll);
+        appendAndModifyModel(modelid, jsonToAll);
+        redefineModel(modelid, jsonArrayS3m);
 
-        // TODO 单个与整体的删除测试
+        // 单个与整体的删除测试
 //        File file = new File("E:\\SuperMapData\\test\\saveTest");
 //        String[] fileName = file.list();
 //        List<String> deleteList = new ArrayList<>();
@@ -259,7 +288,7 @@ public class Blockchain {
      */
     private JSONArray saveSingleS3m(String modelid, JSONArray jsonArrayS3m) {
         JSONArray jsonArray = new JSONArray();
-        String getRecord = "GetRecord";
+        String getRecord = "GetRecordByKey";
         String putRecord = "PutRecord";
         for (Object object : jsonArrayS3m) {
             JSONObject jsonObject = (JSONObject) object;
@@ -267,7 +296,7 @@ public class Blockchain {
             JSONArray tmp = (JSONArray) jsonObject.get("SHash");
             String modifySHash = tmp.getString(0);
             String key = modelid + "-" + SID;
-            String result = atlChain.query(
+            String result = smChain.getSmTransaction().query(
                     chaincodeName,
                     getRecord,
                     new String[]{key}
@@ -278,7 +307,7 @@ public class Blockchain {
                 String oldSHash = tmp.getString(0);
                 if (!modifySHash.equals(oldSHash)) {
                     String value = jsonObject.toString().replace(oldSHash, modifySHash);
-                    String newResult = atlChain.invoke(
+                    String newResult = smChain.getSmTransaction().invoke(
                             chaincodeName,
                             putRecord,
                             new String[]{key, value}
@@ -291,7 +320,7 @@ public class Blockchain {
                 }
             } else {
                 String value = jsonObject.toString();
-                String newResult = atlChain.invoke(
+                String newResult = smChain.getSmTransaction().invoke(
                         chaincodeName,
                         putRecord,
                         new String[]{key, value}
@@ -316,7 +345,7 @@ public class Blockchain {
     private void appendAndModifyModel(String modelid, JSONArray jsonArrayS3m) {
         String getRecord = "GetRecord";
         String putRecord = "PutRecord";
-        String result = atlChain.query(
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 getRecord,
                 new String[]{modelid}
@@ -349,7 +378,7 @@ public class Blockchain {
             jsonObject.put("SHash", newJsonArray);
             String newValue = jsonObject.toString();
 //            System.out.println("newValue" + newValue);
-            atlChain.invoke(
+            smChain.getSmTransaction().invoke(
                     chaincodeName,
                     putRecord,
                     new String[]{modelid, newValue}
@@ -374,7 +403,7 @@ public class Blockchain {
         jsonObject.put("SHash", jsonArray);
         String newValue = jsonObject.toString();
 //        System.out.println("newValue" + newValue);
-        atlChain.invoke(
+        smChain.getSmTransaction().invoke(
                 chaincodeName,
                 putRecord,
                 new String[]{modelid, newValue}
@@ -394,7 +423,7 @@ public class Blockchain {
         String key = null;
         for (String str : listKey) {
             key = modelid + "-" + str;
-            String result = atlChain.query(
+            String result = smChain.getSmTransaction().query(
                     chaincodeName,
                     getRecord,
                     new String[]{key}
@@ -420,7 +449,7 @@ public class Blockchain {
      */
     private void deletesALLS3mMoudle(String modelid, JSONArray deleteJson){
         String getRecord = "GetRecord";
-        String result = atlChain.query(
+        String result = smChain.getSmTransaction().query(
                 chaincodeName,
                 getRecord,
                 new String[]{modelid}

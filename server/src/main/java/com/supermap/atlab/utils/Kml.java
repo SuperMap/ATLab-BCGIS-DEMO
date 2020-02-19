@@ -83,11 +83,13 @@ public class Kml {
 
                 FileInputStream in = new FileInputStream(tempFile);
                 hash = Utils.getSHA256(Utils.inputStreamToByteArray(in));
+                JSONArray jsonHash = new JSONArray();
+                jsonHash.add(hash);
                 String SID = str.substring(0, str.lastIndexOf('.'));
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("MID", modelID);
                 jsonObject.put("SID", SID);
-                jsonObject.put("SHash", hash);
+                jsonObject.put("SHash", jsonHash);
                 jsonArray.add(i, jsonObject);
                 i++;
             } catch (FileNotFoundException e) {
