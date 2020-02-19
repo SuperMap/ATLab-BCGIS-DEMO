@@ -44,11 +44,11 @@ channels:
     # operational decisions to share loads from applications among the orderers.  The values must
     # be "names" of orgs defined under "organizations/peers"
     orderers:
-      - orderer1.example.com
+      - orderer0.example.com
 
     # Required. list of peers from participating orgs
     peers:
-      peer0.orgb.example.com:
+      peer0.orga.example.com:
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
@@ -70,16 +70,16 @@ organizations:
   # peers with a public URL to send transaction proposals. The file will not contain private
   # information reserved for members of the organization, such as admin key and certificate,
   # fabric-ca registrar enroll ID and secret, etc.
-  OrgB:
-    mspid: OrgB
+  OrgA:
+    mspid: OrgA
     peers:
-      - peer0.orgb.example.com
+      - peer0.orga.example.com
     certificateAuthorities:
-      - ca.orgb.example.com
+      - ca.orga.example.com
     adminPrivateKey:
-      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/keystore/9f7a71c224dd2f529fe412c13e062cffcc335a6b8cf76e78bc8a10399dacd0e7_sk
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/users/Admin@orga.example.com/msp/keystore/f7b91e2fcfa495d5fbc11960b902b1a0d3d17c482af3b0a0412283c134a48d99_sk
     signedCert:
-      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/users/Admin@orgb.example.com/msp/signcerts/Admin@orgb.example.com-cert.pem
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/users/Admin@orga.example.com/msp/signcerts/Admin@orga.example.com-cert.pem
 
 #
 # List of orderers to send transaction and channel create/update requests to. For the time
@@ -87,13 +87,13 @@ organizations:
 # SDK is implementation specific. Consult each SDK's documentation for its handling of orderers.
 #
 orderers:
-  orderer1.example.com:
-    url: grpcs://orderer1.example.com:7050
+  orderer0.example.com:
+    url: grpcs://orderer0.example.com:7050
 
     # these are standard properties defined by the gRPC library
     # they will be passed in as-is to gRPC client constructor
     grpcOptions:
-      ssl-target-name-override: orderer1.example.com
+      ssl-target-name-override: orderer0.example.com
 
     tlsCACerts:
       path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
@@ -104,12 +104,12 @@ orderers:
 #
 peers:
 
-  peer0.orgb.example.com:
-    url: grpcs://peer0.orgb.example.com:7051
+  peer0.orga.example.com:
+    url: grpcs://peer0.orga.example.com:7051
     grpcOptions:
-      ssl-target-name-override: peer0.orgb.example.com
+      ssl-target-name-override: peer0.orga.example.com
     tlsCACerts:
-      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orgb.example.com/tlsca/tlsca.orgb.example.com-cert.pem
+      path: /home/cy/Documents/Practice/ATLab-ATLChain/ATLChain_NETWORK/crypto-config/peerOrganizations/orga.example.com/tlsca/tlsca.orga.example.com-cert.pem
 #
 # Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
 # certificate management to be done via REST APIs. Application may choose to use a standard
@@ -117,8 +117,8 @@ peers:
 #
 certificateAuthorities:
 
-  ca.orgb.example.com:
-    url: http://ca.orgb.example.com:7054
+  ca.orga.example.com:
+    url: http://ca.orga.example.com:7054
     httpOptions:
       verify: false
     tlsCACerts:

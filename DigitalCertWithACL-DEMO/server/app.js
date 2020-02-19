@@ -152,7 +152,7 @@ app.post('/login', async function (req, res) {
 
 	var jsonObj = JSON.parse(cert);
 	var filename = jsonObj.enrollment.signingIdentity + "-pub";
-	var address = account.getAddress('./fabric-client-kv-orgb/' + filename);
+	var address = account.getAddress('./fabric-client-kv-orga/' + filename);
 
 	console.log("address:" + address);
 
@@ -195,7 +195,7 @@ app.post('/users', async function (req, res) {
 	logger.debug('-- returned from registering the username %s for organization %s', username, orgName);
 	if (response && typeof response !== 'string') {
 
-		var fdata = fs.readFileSync('./fabric-client-kv-orgb/' + username);
+		var fdata = fs.readFileSync('./fabric-client-kv-orga/' + username);
 		var jsonObj = JSON.parse(fdata);
 		var filename = jsonObj.enrollment.signingIdentity + "-priv";
 		var pubkeyFile = jsonObj.enrollment.signingIdentity + "-pub";
@@ -203,11 +203,11 @@ app.post('/users', async function (req, res) {
 		logger.debug("private key file: " + filename);
 
 		fs.writeFileSync('../web/msp/' + username, fdata);
-		fs.writeFileSync('../web/msp/' + filename, fs.readFileSync('./fabric-client-kv-orgb/' + filename));
+		fs.writeFileSync('../web/msp/' + filename, fs.readFileSync('./fabric-client-kv-orga/' + filename));
 
 		logger.debug('Successfully registered the username %s for organization %s', username, orgName);
 		response.filename = filename;
-		response.address = account.getAddress('./fabric-client-kv-orgb/' + pubkeyFile);
+		response.address = account.getAddress('./fabric-client-kv-orga/' + pubkeyFile);
 		console.log("username:" + username);
 		logger.debug("address: " + response.address);
 		res.json(response);
