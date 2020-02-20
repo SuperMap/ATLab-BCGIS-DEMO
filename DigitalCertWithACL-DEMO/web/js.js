@@ -445,7 +445,7 @@ $(document).ready(function () {
             url: RESTURL + '/channels/txchannel/chaincodes/atlchainCC/TraceRecord',
             data: JSON.stringify({
                 // 'fcn': 'getHistoryByKey',
-                // 'peer': 'peer0.orgb.example.com',
+                // 'peer': 'peer0.orga.example.com',
                 'args': [txid],
                 'username': getCookie("username"),
                 'orgname': getCookie("orgname")
@@ -487,7 +487,7 @@ $(document).ready(function () {
             url: RESTURL + '/channels/txchannel/chaincodes/aclcc/TraceRecord',
             data: JSON.stringify({
                 'fcn': 'GetHistoryByKey',
-                'peer': 'peer0.orgb.example.com',
+                'peer': 'peer0.orga.example.com',
                 'args': [txid],
                 'username': getCookie("username"),
                 'orgname': getCookie("orgname")
@@ -605,7 +605,7 @@ $(document).ready(function () {
                     url: RESTURL + '/channels/txchannel/chaincodes/aclcc/GetRecord',
                     data: JSON.stringify({
                         'fcn': 'GetRecordBySelector',
-                        'peer': 'peer0.orgb.example.com',
+                        'peer': 'peer0.orga.example.com',
                         'args': [args],
                         'username': getCookie("username"),
                         'orgname': getCookie("orgname")
@@ -645,7 +645,7 @@ $(document).ready(function () {
             url: RESTURL + '/channels/txchannel/chaincodes/aclcc/GetRecord',
             data: JSON.stringify({
                 'fcn': 'GetRecordByKey',
-                'peer': 'peer0.orgb.example.com',
+                'peer': 'peer0.orga.example.com',
                 'args': [txid],
                 'username': getCookie("username"),
                 'orgname': getCookie("orgname")
