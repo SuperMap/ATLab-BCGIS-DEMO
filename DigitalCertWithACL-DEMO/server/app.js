@@ -228,7 +228,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName/GetRecord', async fun
 	let orgname = req.body.orgname;
 	var fcn = req.body.fcn;
 	
-	let peer = 'peer0.orgb.example.com';
+	let peer = 'peer0.orga.example.com';
 
 	if (!chaincodeName) {
 		res.json(getErrorMessage('\'chaincodeName\''));
@@ -282,7 +282,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName/putTx', async functio
 	var username = req.body.username;
 	var orgname = req.body.orgname;
 
-	var peers = ['peer0.orgb.example.com'];
+	var peers = ['peer0.orga.example.com'];
 	var fcn = "Put";
 
 	if (!args) {
@@ -370,7 +370,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName/AddRecord', async fun
 	console.log(args)
 	console.log("+++++++++++++++++++++++");
 
-	var peers = ['peer0.orgb.example.com'];
+	var peers = ['peer0.orga.example.com'];
 	var fcn = "PutRecord";
 
 	if (!args) {
